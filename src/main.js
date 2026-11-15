@@ -27,13 +27,14 @@ if (!app.requestSingleInstanceLock()) app.quit();
 // ---------- small JSON store (settings + window position) ----------
 
 const storeFile = () => path.join(app.getPath('userData'), 'ytm-desktop.json');
-let store = { colors: { ...theme.DEFAULT_COLORS }, window: null };
+let store = { colors: { ...theme.DEFAULT_COLORS }, clear: false, window: null };
 let saveTimer = null;
 
 function loadStore() {
   try {
     const raw = JSON.parse(fs.readFileSync(storeFile(), 'utf8'));
     store.colors = theme.sanitize(raw.colors);
+    store.clear = raw.clear === true;
     if (raw.window && typeof raw.window === 'object') store.window = raw.window;
   } catch {
     /* first launch or unreadable file: keep defaults */
@@ -62,6 +63,7 @@ let win = null;
 let view = null;
 let drawerOpen = false;
 let variablesKey = null;
+let rebuilding = false;
 
 function restoredBounds() {
   const saved = store.window;
@@ -146,7 +148,7 @@ async function applyVariables() {
   if (!view || !isMusicPage(view.webContents)) return;
   const previous = variablesKey;
   try {
-    variablesKey = await view.webContents.insertCSS(theme.variablesCss(store.colors));
+    variablesKey = await view.webContents.insertCSS(theme.variablesCss(store.colors, store.clear));
     if (previous) await view.webContents.removeInsertedCSS(previous);
   } catch {
     /* page went away mid-update */
@@ -155,9 +157,10 @@ async function applyVariables() {
 
 function applyTheme() {
   const p = theme.palette(store.colors);
-  if (win && !win.isDestroyed()) win.setBackgroundColor(p.base);
-  if (view) view.setBackgroundColor(p.base);
-  sendToShell('theme', { colors: store.colors, palette: p });
+  const paint = store.clear ? '#00000000' : p.base;
+  if (win && !win.isDestroyed()) win.setBackgroundColor(paint);
+  if (view) view.setBackgroundColor(paint);
+  sendToShell('theme', { colors: store.colors, palette: p, clear: store.clear });
   applyVariables();
 }
 
@@ -188,7 +191,9 @@ function createWindow() {
     minHeight: 600,
     frame: false,
     show: false,
-    backgroundColor: p.base,
+    // A see-through window has to be created that way; it cannot be switched live.
+    transparent: store.clear,
+    backgroundColor: store.clear ? '#00000000' : p.base,
     title: 'YTM Desktop',
     icon: path.join(__dirname, '..', 'assets', 'icon.png'),
     webPreferences: {
@@ -205,7 +210,7 @@ function createWindow() {
       sandbox: true,
     },
   });
-  view.setBackgroundColor(p.base);
+  view.setBackgroundColor(store.clear ? '#00000000' : p.base);
   win.contentView.addChildView(view);
   layout();
 
@@ -257,7 +262,9 @@ function createWindow() {
     });
   }
   win.on('close', saveStoreNow);
+  const thisWindow = win;
   win.on('closed', () => {
+    if (win !== thisWindow) return; // already replaced by a new window
     win = null;
     view = null;
   });
@@ -289,6 +296,7 @@ ipcMain.on('nav:home', () => view && view.webContents.loadURL(HOME_URL));
 ipcMain.handle('settings:get', () => ({
   colors: store.colors,
   palette: theme.palette(store.colors),
+  clear: store.clear,
   presets: theme.PRESETS,
   defaults: theme.DEFAULT_COLORS,
 }));
@@ -303,6 +311,26 @@ ipcMain.on('settings:reset', () => {
   store.colors = { ...theme.DEFAULT_COLORS };
   saveStoreSoon();
   applyTheme();
+});
+
+// Switching the see-through background needs a fresh window, so the window is
+// rebuilt (the page reloads; the sign-in and settings are kept).
+ipcMain.on('settings:set-clear', (_event, clear) => {
+  const next = Boolean(clear);
+  if (next === store.clear || !win) return;
+  store.clear = next;
+  rememberBounds();
+  saveStoreNow();
+  const oldWindow = win;
+  const oldPage = view ? view.webContents : null;
+  rebuilding = true;
+  drawerOpen = false;
+  variablesKey = null;
+  createWindow();
+  oldWindow.destroy();
+  // Make sure the old page (and its music) does not keep running unseen.
+  if (oldPage && !oldPage.isDestroyed()) oldPage.close();
+  rebuilding = false;
 });
 
 ipcMain.on('drawer:set', (_event, open) => {
@@ -347,4 +375,6 @@ app.whenReady().then(() => {
 
 app.on('will-quit', () => globalShortcut.unregisterAll());
 
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => {
+  if (!rebuilding) app.quit();
+});

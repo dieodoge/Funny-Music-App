@@ -75,14 +75,33 @@ function palette(input) {
 }
 
 // CSS custom properties shared by the shell and the YouTube Music page.
-function variablesCss(input) {
+// With `clear` on, the window itself is see-through: the big background areas
+// are painted with nothing, so the desktop shows behind the text and artwork.
+function variablesCss(input, clear = false) {
   const p = palette(input);
-  return `:root{
-  --app-accent:${p.accent};--app-bg:${p.bg};--app-text:${p.text};--app-base:${p.base};
+  const vars = `:root{
+  --app-accent:${p.accent};--app-bg:${p.bg};--app-text:${p.text};
+  --app-base:${clear ? 'transparent' : p.base};--app-panel:${clear ? 'transparent' : p.bg};
   --app-surface:${p.surface};--app-surface2:${p.surface2};--app-border:${p.border};
   --app-muted:${p.muted};--app-on-accent:${p.onAccent};--app-accent-soft:${p.accentSoft};
+  --app-clear:${clear ? 1 : 0};
   color-scheme:${p.dark ? 'dark' : 'light'};
 }`;
+  if (!clear) return vars;
+  const shadow = p.dark ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.8)';
+  return `${vars}
+ytmusic-app::before,ytmusic-app::after{background:transparent !important;}
+html{text-shadow:0 1px 3px ${shadow};}
+tp-yt-iron-dropdown,ytmusic-popup-container,tp-yt-paper-dialog,#ytmd-album-button{text-shadow:none;}
+/* The now-playing page sits on top of the browse page; hide what is under it. */
+ytmusic-app-layout[player-page-open] > #content{visibility:hidden !important;}
+/* Keep scrolling content from showing through the (now clear) top and bottom bars. */
+ytmusic-app-layout > #content{
+  --ytmd-top:calc(var(--ytmd-scroll,0px) + 64px);
+  --ytmd-end:calc(var(--ytmd-scroll,0px) + 100vh - var(--ytmd-bottom,88px));
+  clip-path:polygon(0 var(--ytmd-top),100% var(--ytmd-top),100% var(--ytmd-end),0 var(--ytmd-end));
+}
+ytmusic-app:has(ytmusic-app-layout[player-ui-state='INACTIVE']){--ytmd-bottom:0px;}`;
 }
 
 module.exports = { PRESETS, DEFAULT_COLORS, sanitize, palette, variablesCss, isHex };

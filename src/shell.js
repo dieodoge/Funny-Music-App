@@ -53,6 +53,8 @@ document.addEventListener('keydown', (event) => {
 
 function render(theme) {
   colors = theme.colors;
+  document.documentElement.classList.toggle('clear', Boolean(theme.clear));
+  $('toggle-clear').checked = Boolean(theme.clear);
   const root = document.documentElement.style;
   const p = theme.palette;
   root.setProperty('--app-accent', p.accent);
@@ -117,6 +119,7 @@ for (const key of KEYS) {
 }
 
 $('btn-reset').addEventListener('click', () => api.resetColors());
+$('toggle-clear').addEventListener('change', (event) => api.setClear(event.target.checked));
 
 api.onTheme(render);
 

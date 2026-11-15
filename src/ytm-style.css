@@ -9,6 +9,7 @@
 :root {
   --app-accent: #8b7cf6;
   --app-bg: #14141b;
+  --app-panel: #14141b;
   --app-text: #f2f2f7;
   --app-base: #0a0a0e;
   --app-surface: #23232b;
@@ -25,21 +26,21 @@
 /* ---------- color mapping ---------- */
 
 html:root {
-  --ytmusic-background: var(--app-bg) !important;
-  --ytmusic-general-background-a: var(--app-bg) !important;
-  --ytmusic-general-background-c: var(--app-bg) !important;
+  --ytmusic-background: var(--app-panel) !important;
+  --ytmusic-general-background-a: var(--app-panel) !important;
+  --ytmusic-general-background-c: var(--app-panel) !important;
   --ytmusic-color-black1: var(--app-surface) !important;
-  --ytmusic-color-black2: var(--app-bg) !important;
-  --ytmusic-color-black4: var(--app-bg) !important;
+  --ytmusic-color-black2: var(--app-panel) !important;
+  --ytmusic-color-black4: var(--app-panel) !important;
   --ytmusic-brand-background-solid: var(--app-surface) !important;
   --ytmusic-nav-bar: var(--app-base) !important;
   --ytmusic-player-bar-background: var(--app-base) !important;
-  --ytmusic-player-page-background: var(--app-bg) !important;
-  --ytmusic-detail-header: var(--app-bg) !important;
+  --ytmusic-player-page-background: var(--app-panel) !important;
+  --ytmusic-detail-header: var(--app-panel) !important;
   --ytmusic-dropdown-background: var(--app-surface) !important;
   --ytmusic-dialog-background-color: var(--app-surface) !important;
   --ytmusic-menu-popup-background: var(--app-surface) !important;
-  --ytmusic-footer-background: var(--app-bg) !important;
+  --ytmusic-footer-background: var(--app-panel) !important;
   --ytmusic-search-background: var(--app-surface) !important;
   --ytmusic-search-border: var(--app-border) !important;
   --ytmusic-horizontal-action-card-background: var(--app-surface) !important;
@@ -129,12 +130,12 @@ html:root {
   --ytmusic-brand-link-text: var(--app-accent) !important;
   --ytmusic-color-blue-1: var(--app-accent) !important;
 
-  --yt-spec-base-background: var(--app-bg) !important;
+  --yt-spec-base-background: var(--app-panel) !important;
   --yt-spec-raised-background: var(--app-surface) !important;
   --yt-spec-menu-background: var(--app-surface) !important;
-  --yt-spec-general-background-a: var(--app-bg) !important;
-  --yt-spec-general-background-b: var(--app-bg) !important;
-  --yt-spec-general-background-c: var(--app-bg) !important;
+  --yt-spec-general-background-a: var(--app-panel) !important;
+  --yt-spec-general-background-b: var(--app-panel) !important;
+  --yt-spec-general-background-c: var(--app-panel) !important;
   --yt-spec-brand-background-solid: var(--app-surface) !important;
   --yt-spec-brand-background-primary: var(--app-surface) !important;
   --yt-spec-text-primary: var(--app-text) !important;
@@ -216,7 +217,7 @@ ytmusic-app::after {
   top: 64px;
   bottom: calc(var(--app-bar-h) + var(--app-gap));
   border-radius: var(--app-radius);
-  background: var(--app-bg);
+  background: var(--app-panel);
   z-index: -1;
   pointer-events: none;
 }
@@ -230,7 +231,7 @@ ytmusic-app::after {
   left: 240px;
   right: 0;
   /* A soft wash of the accent color at the top of the main panel. */
-  background: linear-gradient(color-mix(in srgb, var(--app-accent) 14%, var(--app-bg)), var(--app-bg) 340px);
+  background: linear-gradient(color-mix(in srgb, var(--app-accent) 14%, var(--app-panel)), var(--app-panel) 340px);
 }
 
 /* The page's own full-width dark fade; the panel above replaces it. */
@@ -526,7 +527,7 @@ ytmusic-player-bar #right-controls {
 /* ---------- now-playing page ---------- */
 
 ytmusic-player-page {
-  background: var(--app-bg) !important;
+  background: var(--app-panel) !important;
   border-radius: var(--app-radius);
 }
 
@@ -559,4 +560,78 @@ ytmusic-player-page {
 .ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextText,
 .ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextOutline {
   color: var(--app-accent) !important;
+}
+
+/* ---------- mini album art (bottom right while browsing) ---------- */
+
+@keyframes ytmd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ytmd-pop {
+  from {
+    transform: scale(0.4) rotate(-200deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* For songs (not music videos) the popup becomes a round disc that spins in
+   when it appears and keeps turning slowly while music plays. */
+ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 3px var(--app-accent) !important;
+  animation: ytmd-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
+  animation: ytmd-spin 16s linear infinite;
+  animation-play-state: paused;
+}
+
+html[ytmd-playing] ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
+  animation-play-state: running;
+}
+
+/* The little hole in the middle of the disc. */
+ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  background: var(--app-base);
+  box-shadow: 0 0 0 3px var(--app-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] .top-row-buttons {
+  justify-content: center !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ytmusic-player[player-ui-state='MINIPLAYER'],
+  ytmusic-player[player-ui-state='MINIPLAYER'] #song-image {
+    animation: none !important;
+  }
+}
+
+/* ---------- video missing: show the album art instead ---------- */
+
+ytmusic-player[ytmd-no-video] #song-video .html5-video-player {
+  background: var(--ytmd-art) center / contain no-repeat !important;
+}
+
+ytmusic-player[ytmd-no-video] #song-video video {
+  opacity: 0 !important;
 }

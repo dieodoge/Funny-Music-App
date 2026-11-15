@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('ytmd', {
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setColors: (colors) => ipcRenderer.send('settings:set-colors', colors),
   resetColors: () => ipcRenderer.send('settings:reset'),
+  setClear: (clear) => ipcRenderer.send('settings:set-clear', clear),
   setDrawer: (open) => ipcRenderer.send('drawer:set', open),
   onWindowState: on('win:state'),
   onNavState: on('nav:state'),

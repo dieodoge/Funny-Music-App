@@ -30,6 +30,24 @@ Click the colors button in the top bar. Pick a preset, or click the round
 swatches next to Accent, Background and Text to choose your own. Changes show
 immediately and are remembered. **Reset to default** undoes everything.
 
+## Extras
+
+- **Spinning album disc**: when you browse while a song plays, the small album
+  picture at the bottom right is a round disc that spins in and keeps turning
+  while music plays (it stops when paused).
+- **See-through background**: in the colors panel, under Window. Shows your
+  desktop behind the app. Switching it reloads the page, and while it is on the
+  window cannot be resized by dragging its edges (maximize still works).
+- **Album art instead of a blank video**: if the player is in video mode and no
+  picture arrives within a few seconds, the album art is shown there.
+
+## Sharing with friends
+
+Send them `dist\YTM Desktop Setup 1.1.0.exe` (about 116 MB). It installs the app
+with its own shortcuts. Windows will warn that the publisher is unknown because
+the app is not signed: "More info" then "Run anyway". Each person uses their
+own account and gets their own colors.
+
 ## For rebuilding (only needed after changing the code)
 
 Node.js is bundled in `.tools\node` (not installed system-wide). From this folder:

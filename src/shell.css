@@ -370,3 +370,60 @@ input[type='color']::-webkit-color-swatch {
   font-size: 12px;
   user-select: text;
 }
+
+/* ---------- see-through switch ---------- */
+
+.switch-row {
+  border-bottom: 0;
+}
+
+input[role='switch'] {
+  appearance: none;
+  flex: none;
+  width: 42px;
+  height: 24px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--app-surface2);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+input[role='switch']::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--app-text);
+  transition: transform 0.15s, background 0.15s;
+}
+
+input[role='switch']:checked {
+  background: var(--app-accent);
+}
+
+input[role='switch']:checked::after {
+  transform: translateX(18px);
+  background: var(--app-on-accent);
+}
+
+/* ---------- see-through mode ---------- */
+
+html.clear,
+html.clear body,
+html.clear #titlebar {
+  background: transparent;
+}
+
+html.clear #titlebar {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+html.clear .tb-btn,
+html.clear .wc-btn {
+  color: var(--app-text);
+}

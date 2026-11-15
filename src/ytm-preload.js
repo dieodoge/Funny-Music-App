@@ -76,6 +76,44 @@ function sync() {
   }
 }
 
+// ---------- small visual helpers used by the stylesheet ----------
+
+// Marks the page while music is actually playing (the mini album disc spins then).
+function markPlaying() {
+  const media = document.querySelector('video');
+  document.documentElement.toggleAttribute('ytmd-playing', Boolean(media && !media.paused && !media.ended));
+}
+
+// Scroll position, used in see-through mode to keep content out from under the bars.
+function markScroll() {
+  document.documentElement.style.setProperty('--ytmd-scroll', `${window.scrollY}px`);
+}
+
+// When the player is in video mode but no picture arrives, show the album art.
+let noPictureSince = 0;
+function checkVideoPicture() {
+  const player = document.querySelector('ytmusic-player');
+  if (!player) return;
+  const area = player.querySelector('#song-video');
+  const media = player.querySelector('video');
+  const advert = player.querySelector('.html5-video-player.ad-showing');
+  const areaShown = Boolean(area && area.getClientRects().length);
+  const missing = areaShown && !advert && media && media.videoWidth === 0;
+  if (!missing) {
+    noPictureSince = 0;
+    if (player.hasAttribute('ytmd-no-video')) player.removeAttribute('ytmd-no-video');
+    return;
+  }
+  if (!noPictureSince) noPictureSince = Date.now();
+  // Give a real video a few seconds to start before deciding there is none.
+  if (Date.now() - noPictureSince < 3000) return;
+  const thumb = document.querySelector('ytmusic-player-bar .thumbnail-image-wrapper img');
+  const src = thumb && thumb.src ? thumb.src.replace(/=w\d+-h\d+/, '=w544-h544') : '';
+  if (!src) return;
+  player.style.setProperty('--ytmd-art', `url("${src.replace(/["\\\n]/g, '')}")`);
+  if (!player.hasAttribute('ytmd-no-video')) player.setAttribute('ytmd-no-video', '');
+}
+
 let queued = false;
 function scheduleSync() {
   if (queued) return;
@@ -108,6 +146,21 @@ function start() {
     }
   }, 2000);
   scheduleSync();
+
+  // Media events do not bubble, so listen during the capture phase.
+  for (const type of ['play', 'playing', 'pause', 'ended', 'emptied']) {
+    document.addEventListener(type, markPlaying, true);
+  }
+  window.addEventListener('scroll', markScroll, { passive: true });
+  markScroll();
+  setInterval(() => {
+    try {
+      markPlaying();
+      checkVideoPicture();
+    } catch {
+      /* ignore */
+    }
+  }, 1000);
 }
 
 if (document.readyState === 'loading') {
