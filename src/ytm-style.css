@@ -583,24 +583,24 @@ ytmusic-player-page {
 
 /* For songs (not music videos) the popup becomes a round disc that spins in
    when it appears and keeps turning slowly while music plays. */
-ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] {
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] {
   border-radius: 50% !important;
   overflow: hidden !important;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 3px var(--app-accent) !important;
   animation: ytmd-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1);
 }
 
-ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
   animation: ytmd-spin 16s linear infinite;
   animation-play-state: paused;
 }
 
-html[ytmd-playing] ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
+html[ytmd-playing]:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
   animation-play-state: running;
 }
 
 /* The little hole in the middle of the disc. */
-ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED']::after {
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED']::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -615,7 +615,7 @@ ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED']::aft
   z-index: 1;
 }
 
-ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] .top-row-buttons {
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] .top-row-buttons {
   justify-content: center !important;
 }
 
@@ -634,4 +634,172 @@ ytmusic-player[ytmd-no-video] #song-video .html5-video-player {
 
 ytmusic-player[ytmd-no-video] #song-video video {
   opacity: 0 !important;
+}
+
+/* ---------- 3D CD case (optional replacement for the spinning disc) ---------- */
+
+/* While the case is showing, the page's own mini picture is hidden. */
+html[ytmd-case-on] ytmusic-player[player-ui-state='MINIPLAYER'] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#ytmd-case {
+  position: fixed;
+  right: 40px;
+  bottom: calc(var(--app-bar-h) + 26px);
+  width: 200px;
+  height: 200px;
+  perspective: 760px;
+  z-index: 4;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  animation: ytmd-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+#ytmd-case[hidden] {
+  display: none;
+}
+
+#ytmd-case.dragging {
+  cursor: grabbing;
+}
+
+#ytmd-case .box {
+  position: absolute;
+  left: 12px;
+  top: 22px;
+  width: 176px;
+  height: 156px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+#ytmd-case .face {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background: #101014;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+#ytmd-case .front,
+#ytmd-case .back {
+  inset: 0;
+  border-radius: 4px;
+}
+
+#ytmd-case .front {
+  transform: translateZ(7px);
+  display: flex;
+}
+
+#ytmd-case .back {
+  transform: rotateY(180deg) translateZ(7px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  color: #fff;
+  font: 500 12px/1.3 Roboto, 'Segoe UI', sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* The ridged plastic strip down the left of a CD case. */
+#ytmd-case .hinge {
+  flex: none;
+  width: 20px;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.16) 0 2px, rgba(0, 0, 0, 0.35) 2px 5px), #1b1b21;
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#ytmd-case .front img {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+#ytmd-case .back img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(6px) brightness(0.45);
+  transform: scale(1.15);
+  pointer-events: none;
+}
+
+#ytmd-case .back b,
+#ytmd-case .back span {
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#ytmd-case .back b {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Shine across the clear plastic. */
+#ytmd-case .front::after,
+#ytmd-case .back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05) 30%, transparent 46%, transparent 72%, rgba(255, 255, 255, 0.12));
+  pointer-events: none;
+}
+
+#ytmd-case .side {
+  background: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08)), #2a2a33;
+}
+
+#ytmd-case .left,
+#ytmd-case .right {
+  width: 14px;
+  height: 156px;
+  left: 81px;
+  top: 0;
+}
+
+#ytmd-case .left {
+  transform: rotateY(-90deg) translateZ(88px);
+}
+
+#ytmd-case .right {
+  transform: rotateY(90deg) translateZ(88px);
+}
+
+#ytmd-case .top,
+#ytmd-case .bottom {
+  width: 176px;
+  height: 14px;
+  left: 0;
+  top: 71px;
+}
+
+#ytmd-case .top {
+  transform: rotateX(90deg) translateZ(78px);
+}
+
+#ytmd-case .bottom {
+  transform: rotateX(-90deg) translateZ(78px);
+}
+
+#ytmd-case .shadow {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  bottom: 4px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(rgba(0, 0, 0, 0.5), transparent 70%);
+  pointer-events: none;
 }

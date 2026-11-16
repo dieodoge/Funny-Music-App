@@ -114,6 +114,136 @@ function checkVideoPicture() {
   if (!player.hasAttribute('ytmd-no-video')) player.setAttribute('ytmd-no-video', '');
 }
 
+// Marks the page while an advert is playing, so the mini picture stays a plain
+// rectangle for adverts instead of being cropped into a disc.
+function advertShowing() {
+  const bar = document.querySelector('ytmusic-player-bar');
+  const badge = bar && bar.querySelector('.badge-style-type-ad-stark');
+  return Boolean(
+    document.querySelector('ytmusic-player .html5-video-player.ad-showing') ||
+      (badge && badge.getClientRects().length),
+  );
+}
+
+// ---------- 3D CD case (optional, replaces the flat spinning disc) ----------
+
+const CASE_SPIN = 26; // degrees per second while music plays
+const spin = { el: null, box: null, y: -28, x: 10, speed: CASE_SPIN, dragging: false, moved: 0, last: 0, frame: 0 };
+
+function el(tag, className) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  return node;
+}
+
+function buildCase() {
+  const host = el('div');
+  host.id = 'ytmd-case';
+  host.title = 'Drag to turn - click to open the player';
+  const box = el('div', 'box');
+
+  const front = el('div', 'face front');
+  front.append(el('div', 'hinge'), el('img'));
+  const back = el('div', 'face back');
+  back.append(el('img'), el('b'), el('span'));
+  box.append(front, back);
+  for (const side of ['left', 'right', 'top', 'bottom']) box.append(el('div', `face side ${side}`));
+  host.append(el('div', 'shadow'), box);
+
+  host.addEventListener('pointerdown', (event) => {
+    spin.dragging = true;
+    spin.moved = 0;
+    host.classList.add('dragging');
+    host.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+  host.addEventListener('pointermove', (event) => {
+    if (!spin.dragging) return;
+    spin.moved += Math.abs(event.movementX) + Math.abs(event.movementY);
+    spin.y += event.movementX * 0.7;
+    spin.x = Math.max(-65, Math.min(65, spin.x - event.movementY * 0.5));
+    // A flick keeps the case turning for a moment after letting go.
+    spin.speed = Math.max(-720, Math.min(720, event.movementX * 40));
+  });
+  const release = () => {
+    if (!spin.dragging) return;
+    spin.dragging = false;
+    host.classList.remove('dragging');
+    if (spin.moved < 5) {
+      // A plain click (no drag) opens the full player, like the normal mini picture.
+      spin.speed = CASE_SPIN;
+      const toggle = document.querySelector('ytmusic-player-bar .toggle-player-page-button');
+      if (toggle) (toggle.querySelector('button') || toggle).click();
+    }
+  };
+  host.addEventListener('pointerup', release);
+  host.addEventListener('pointercancel', release);
+
+  spin.el = host;
+  spin.box = box;
+  return host;
+}
+
+function turnCase(now) {
+  spin.frame = 0;
+  if (!spin.el || spin.el.hidden) return;
+  const dt = Math.min(0.1, (now - (spin.last || now)) / 1000);
+  spin.last = now;
+  if (!spin.dragging) {
+    const playing = document.documentElement.hasAttribute('ytmd-playing');
+    const target = playing ? CASE_SPIN : 0;
+    // Ease from a flick (or a stop) back to the steady turning speed.
+    spin.speed += (target - spin.speed) * Math.min(1, dt * 2.2);
+    spin.y += spin.speed * dt;
+    spin.x += (10 - spin.x) * Math.min(1, dt * 1.5);
+  }
+  spin.box.style.transform = `rotateX(${spin.x.toFixed(2)}deg) rotateY(${spin.y.toFixed(2)}deg)`;
+  spin.frame = requestAnimationFrame(turnCase);
+}
+
+function syncCase() {
+  const root = document.documentElement;
+  const player = document.querySelector('ytmusic-player');
+  const advert = advertShowing();
+  root.toggleAttribute('ytmd-ad', advert);
+
+  const wanted =
+    getComputedStyle(root).getPropertyValue('--app-case3d').trim() === '1' &&
+    player &&
+    player.getAttribute('player-ui-state') === 'MINIPLAYER' &&
+    player.getAttribute('playback-mode') === 'ATV_PREFERRED' &&
+    !advert;
+
+  if (!wanted) {
+    if (spin.el && !spin.el.hidden) spin.el.hidden = true;
+    root.removeAttribute('ytmd-case-on');
+    return;
+  }
+
+  const host = spin.el || buildCase();
+  if (!host.isConnected) document.body.append(host);
+  const thumb = document.querySelector('ytmusic-player-bar .thumbnail-image-wrapper img');
+  const src = thumb && thumb.src ? thumb.src.replace(/=w\d+-h\d+/, '=w544-h544') : '';
+  for (const img of host.querySelectorAll('img')) {
+    if (src && img.src !== src) img.src = src;
+  }
+  const title = document.querySelector('ytmusic-player-bar .title');
+  const byline = document.querySelector('ytmusic-player-bar .byline');
+  const titleText = title ? title.textContent.trim() : '';
+  const bylineText = byline ? byline.textContent.trim() : '';
+  const b = host.querySelector('.back b');
+  const span = host.querySelector('.back span');
+  if (b.textContent !== titleText) b.textContent = titleText;
+  if (span.textContent !== bylineText) span.textContent = bylineText;
+
+  if (host.hidden) host.hidden = false;
+  root.setAttribute('ytmd-case-on', '');
+  if (!spin.frame) {
+    spin.last = 0;
+    spin.frame = requestAnimationFrame(turnCase);
+  }
+}
+
 let queued = false;
 function scheduleSync() {
   if (queued) return;
@@ -161,6 +291,13 @@ function start() {
       /* ignore */
     }
   }, 1000);
+  setInterval(() => {
+    try {
+      syncCase();
+    } catch {
+      /* ignore */
+    }
+  }, 400);
 }
 
 if (document.readyState === 'loading') {

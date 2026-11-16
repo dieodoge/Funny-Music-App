@@ -75,27 +75,44 @@ function palette(input) {
 }
 
 // CSS custom properties shared by the shell and the YouTube Music page.
-// With `clear` on, the window itself is see-through: the big background areas
-// are painted with nothing, so the desktop shows behind the text and artwork.
-function variablesCss(input, clear = false) {
+// With `glass` on, the window uses Windows' frosted-glass backdrop: the desktop
+// shows through, blurred, and the panels become tinted, glossy sheets on top.
+// `case3d` only tells the page which style of mini album art to use.
+function variablesCss(input, options = {}) {
   const p = palette(input);
+  const glass = Boolean(options.glass);
   const vars = `:root{
   --app-accent:${p.accent};--app-bg:${p.bg};--app-text:${p.text};
-  --app-base:${clear ? 'transparent' : p.base};--app-panel:${clear ? 'transparent' : p.bg};
-  --app-surface:${p.surface};--app-surface2:${p.surface2};--app-border:${p.border};
+  --app-base:${glass ? 'transparent' : p.base};
+  --app-panel:${glass ? `color-mix(in srgb, ${p.bg} 46%, transparent)` : p.bg};
+  --app-surface:${glass ? `color-mix(in srgb, ${p.text} 9%, transparent)` : p.surface};
+  --app-surface2:${glass ? `color-mix(in srgb, ${p.text} 16%, transparent)` : p.surface2};
+  --app-border:${glass ? `color-mix(in srgb, ${p.text} 16%, transparent)` : p.border};
   --app-muted:${p.muted};--app-on-accent:${p.onAccent};--app-accent-soft:${p.accentSoft};
-  --app-clear:${clear ? 1 : 0};
+  --app-solid:${p.surface};
+  --app-glass:${glass ? 1 : 0};--app-case3d:${options.case3d ? 1 : 0};
   color-scheme:${p.dark ? 'dark' : 'light'};
 }`;
-  if (!clear) return vars;
-  const shadow = p.dark ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.8)';
+  if (!glass) return vars;
   return `${vars}
-ytmusic-app::before,ytmusic-app::after{background:transparent !important;}
-html{text-shadow:0 1px 3px ${shadow};}
-tp-yt-iron-dropdown,ytmusic-popup-container,tp-yt-paper-dialog,#ytmd-album-button{text-shadow:none;}
+/* Panels become glossy sheets: a light sheen across the top-left, a fine bright edge. */
+ytmusic-app::before,ytmusic-app::after{
+  background:linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04) 32%, transparent 60%), var(--app-panel) !important;
+  border:1px solid color-mix(in srgb, ${p.text} 18%, transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.28), 0 10px 30px rgba(0,0,0,0.18);
+  box-sizing:border-box;
+}
+/* Menus and dialogs stay solid so they are easy to read. */
+html:root{
+  --ytmusic-dropdown-background:var(--app-solid) !important;--ytmusic-dialog-background-color:var(--app-solid) !important;
+  --ytmusic-menu-popup-background:var(--app-solid) !important;--yt-spec-menu-background:var(--app-solid) !important;
+  --yt-spec-raised-background:var(--app-solid) !important;--ytmusic-search-background:var(--app-solid) !important;
+  --ytmusic-color-black1:var(--app-solid) !important;--ytmusic-brand-background-solid:var(--app-solid) !important;
+}
+ytmusic-player-page{background:transparent !important;}
 /* The now-playing page sits on top of the browse page; hide what is under it. */
 ytmusic-app-layout[player-page-open] > #content{visibility:hidden !important;}
-/* Keep scrolling content from showing through the (now clear) top and bottom bars. */
+/* Keep scrolling content from showing through the see-through top and bottom bars. */
 ytmusic-app-layout > #content{
   --ytmd-top:calc(var(--ytmd-scroll,0px) + 64px);
   --ytmd-end:calc(var(--ytmd-scroll,0px) + 100vh - var(--ytmd-bottom,88px));

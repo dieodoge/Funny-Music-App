@@ -1,4 +1,4 @@
-const { app, BrowserWindow, WebContentsView, ipcMain, shell, screen, globalShortcut } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, shell, screen, globalShortcut, nativeTheme } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const theme = require('./theme');
@@ -11,12 +11,26 @@ const TEST_MODE = process.env.YTM_TEST === '1';
 // Tests use a throwaway profile so they never touch the real sign-in or settings.
 if (process.env.YTM_USER_DATA) app.setPath('userData', process.env.YTM_USER_DATA);
 
-// Google's sign-in page turns away browsers that announce themselves as an
-// embedded app, so present the plain Chrome engine this app is built on.
+// YouTube Music sees the plain identity of the Chrome engine this app is built on.
 const chromeMajor = process.versions.chrome.split('.')[0];
-app.userAgentFallback =
+const CHROME_UA =
   `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ` +
   `Chrome/${chromeMajor}.0.0.0 Safari/537.36`;
+app.userAgentFallback = CHROME_UA;
+
+// Google's own sign-in page (accounts.google.com) turns this kind of app away
+// with "This browser or app may not be secure". The owner of this app asked
+// for that page, and only that page, to be requested with a Firefox identity,
+// which Google accepts. The owner types their own password on Google's page.
+const SIGN_IN_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0';
+
+function isSignInUrl(url) {
+  try {
+    return new URL(url).hostname === 'accounts.google.com';
+  } catch {
+    return false;
+  }
+}
 
 // This app handles the keyboard media keys itself (see registerMediaKeys).
 // Turn off the engine's built-in handling so a key press is not acted on twice.
@@ -27,14 +41,15 @@ if (!app.requestSingleInstanceLock()) app.quit();
 // ---------- small JSON store (settings + window position) ----------
 
 const storeFile = () => path.join(app.getPath('userData'), 'ytm-desktop.json');
-let store = { colors: { ...theme.DEFAULT_COLORS }, clear: false, window: null };
+let store = { colors: { ...theme.DEFAULT_COLORS }, glass: false, case3d: false, window: null };
 let saveTimer = null;
 
 function loadStore() {
   try {
     const raw = JSON.parse(fs.readFileSync(storeFile(), 'utf8'));
     store.colors = theme.sanitize(raw.colors);
-    store.clear = raw.clear === true;
+    store.glass = raw.glass === true;
+    store.case3d = raw.case3d === true;
     if (raw.window && typeof raw.window === 'object') store.window = raw.window;
   } catch {
     /* first launch or unreadable file: keep defaults */
@@ -148,7 +163,7 @@ async function applyVariables() {
   if (!view || !isMusicPage(view.webContents)) return;
   const previous = variablesKey;
   try {
-    variablesKey = await view.webContents.insertCSS(theme.variablesCss(store.colors, store.clear));
+    variablesKey = await view.webContents.insertCSS(theme.variablesCss(store.colors, { glass: store.glass, case3d: store.case3d }));
     if (previous) await view.webContents.removeInsertedCSS(previous);
   } catch {
     /* page went away mid-update */
@@ -157,10 +172,15 @@ async function applyVariables() {
 
 function applyTheme() {
   const p = theme.palette(store.colors);
-  const paint = store.clear ? '#00000000' : p.base;
-  if (win && !win.isDestroyed()) win.setBackgroundColor(paint);
+  const paint = store.glass ? '#00000000' : p.base;
+  // Windows tints the glass dark or light; make it follow the chosen colors.
+  nativeTheme.themeSource = p.dark ? 'dark' : 'light';
+  if (win && !win.isDestroyed()) {
+    win.setBackgroundMaterial(store.glass ? 'acrylic' : 'none');
+    win.setBackgroundColor(paint);
+  }
   if (view) view.setBackgroundColor(paint);
-  sendToShell('theme', { colors: store.colors, palette: p, clear: store.clear });
+  sendToShell('theme', { colors: store.colors, palette: p, glass: store.glass, case3d: store.case3d });
   applyVariables();
 }
 
@@ -191,9 +211,9 @@ function createWindow() {
     minHeight: 600,
     frame: false,
     show: false,
-    // A see-through window has to be created that way; it cannot be switched live.
-    transparent: store.clear,
-    backgroundColor: store.clear ? '#00000000' : p.base,
+    // Glass look: Windows draws a blurred view of the desktop behind the window.
+    backgroundMaterial: store.glass ? 'acrylic' : 'none',
+    backgroundColor: store.glass ? '#00000000' : p.base,
     title: 'YTM Desktop',
     icon: path.join(__dirname, '..', 'assets', 'icon.png'),
     webPreferences: {
@@ -210,7 +230,7 @@ function createWindow() {
       sandbox: true,
     },
   });
-  view.setBackgroundColor(store.clear ? '#00000000' : p.base);
+  view.setBackgroundColor(store.glass ? '#00000000' : p.base);
   win.contentView.addChildView(view);
   layout();
 
@@ -227,18 +247,45 @@ function createWindow() {
     }
     applyVariables();
   });
+  // While music plays the page asks "leave site?". There is no such dialog in
+  // this app, so without this the Sign in, Reload and Home buttons would do nothing.
+  wc.on('will-prevent-unload', (event) => event.preventDefault());
   wc.on('did-navigate', sendNavState);
   wc.on('did-navigate-in-page', sendNavState);
   wc.on('page-title-updated', (_e, title) => sendToShell('page:title', title));
+  // Requests to the sign-in page carry the sign-in identity; everything else is Chrome.
+  wc.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    const headers = details.requestHeaders;
+    if (isSignInUrl(details.url)) {
+      for (const name of Object.keys(headers)) {
+        if (/^user-agent$/i.test(name) || /^sec-ch-ua/i.test(name)) delete headers[name];
+      }
+      headers['User-Agent'] = SIGN_IN_UA;
+    }
+    callback({ requestHeaders: headers });
+  });
+  const matchIdentity = (url) => {
+    const wanted = isSignInUrl(url) ? SIGN_IN_UA : CHROME_UA;
+    if (wc.getUserAgent() !== wanted) wc.setUserAgent(wanted);
+  };
+  wc.on('will-redirect', (_event, url, _inPlace, isMainFrame) => {
+    if (isMainFrame) matchIdentity(url);
+  });
+  wc.on('did-start-navigation', (_event, url, _inPlace, isMainFrame) => {
+    if (isMainFrame) matchIdentity(url);
+  });
   wc.on('will-navigate', (event, url) => {
     if (!staysInApp(url)) {
       event.preventDefault();
       openOutside(url);
+      return;
     }
+    matchIdentity(url);
   });
   wc.setWindowOpenHandler(({ url }) => {
     if (staysInApp(url)) {
       // Keep sign-in and other Google/YouTube links in this window.
+      matchIdentity(url);
       wc.loadURL(url);
     } else {
       openOutside(url);
@@ -296,7 +343,8 @@ ipcMain.on('nav:home', () => view && view.webContents.loadURL(HOME_URL));
 ipcMain.handle('settings:get', () => ({
   colors: store.colors,
   palette: theme.palette(store.colors),
-  clear: store.clear,
+  glass: store.glass,
+  case3d: store.case3d,
   presets: theme.PRESETS,
   defaults: theme.DEFAULT_COLORS,
 }));
@@ -313,24 +361,18 @@ ipcMain.on('settings:reset', () => {
   applyTheme();
 });
 
-// Switching the see-through background needs a fresh window, so the window is
-// rebuilt (the page reloads; the sign-in and settings are kept).
-ipcMain.on('settings:set-clear', (_event, clear) => {
-  const next = Boolean(clear);
-  if (next === store.clear || !win) return;
-  store.clear = next;
-  rememberBounds();
-  saveStoreNow();
-  const oldWindow = win;
-  const oldPage = view ? view.webContents : null;
-  rebuilding = true;
-  drawerOpen = false;
-  variablesKey = null;
-  createWindow();
-  oldWindow.destroy();
-  // Make sure the old page (and its music) does not keep running unseen.
-  if (oldPage && !oldPage.isDestroyed()) oldPage.close();
-  rebuilding = false;
+// Glass look on/off. Applied live: the music keeps playing.
+ipcMain.on('settings:set-glass', (_event, on) => {
+  store.glass = Boolean(on);
+  saveStoreSoon();
+  applyTheme();
+});
+
+// Flat spinning disc or the 3D CD case for the mini album art.
+ipcMain.on('settings:set-case3d', (_event, on) => {
+  store.case3d = Boolean(on);
+  saveStoreSoon();
+  applyTheme();
 });
 
 ipcMain.on('drawer:set', (_event, open) => {
@@ -369,6 +411,7 @@ function registerMediaKeys() {
 
 app.whenReady().then(() => {
   loadStore();
+  nativeTheme.themeSource = theme.palette(store.colors).dark ? 'dark' : 'light';
   createWindow();
   registerMediaKeys();
 });
