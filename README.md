@@ -58,7 +58,7 @@ its checks this may stop working.
 
 ## Sharing with friends
 
-Send them `dist\YTM Desktop Setup 1.2.0.exe` (about 116 MB). It installs the app
+Send them `dist\YTM Desktop Setup 1.2.1.exe` (about 116 MB). It installs the app
 with its own shortcuts. Windows will warn that the publisher is unknown because
 the app is not signed: "More info" then "Run anyway". Each person uses their
 own account and gets their own colors.

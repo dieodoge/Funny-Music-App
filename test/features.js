@@ -204,6 +204,12 @@ async function waitForSong(ytm) {
   await shell.click('#btn-drawer-close');
 
   // ---------- sign-in page identity (nothing is typed into Google's form) ----------
+  await app.evaluate(({ session }) => {
+    global.__signInUa = null;
+    session.defaultSession.webRequest.onSendHeaders({ urls: ['https://accounts.google.com/*'] }, (details) => {
+      if (!global.__signInUa) global.__signInUa = details.requestHeaders['User-Agent'];
+    });
+  });
   await ytm.evaluate(() => {
     const link = [...document.querySelectorAll('ytmusic-nav-bar a, ytmusic-nav-bar yt-button-shape a')].find((a) => /accounts\.google\.com|ServiceLogin/.test(a.href));
     location.href = link ? link.href : 'https://accounts.google.com/ServiceLogin?service=youtube&continue=https%3A%2F%2Fmusic.youtube.com%2F';
@@ -216,7 +222,9 @@ async function waitForSong(ytm) {
   if (signIn) {
     await sleep(3000);
     const seen = await signIn.evaluate(() => ({ ua: navigator.userAgent, email: Boolean(document.querySelector('input[type="email"], #identifierId')), refused: /may not be secure/i.test(document.body.innerText) }));
-    check('Sign-in page sees the Firefox identity', /Firefox\//.test(seen.ua) && !/Chrome|Electron/.test(seen.ua), seen.ua);
+    const sent = await app.evaluate(() => global.__signInUa);
+    check('Sign-in page is requested with the Firefox identity', /Firefox\//.test(sent || '') && !/Chrome|Electron/.test(sent || ''), String(sent));
+    check('Scripts on the sign-in page still see plain Chrome', /Chrome\//.test(seen.ua) && !/Electron/.test(seen.ua), seen.ua);
     check('Sign-in page shows the email box, not a refusal', seen.email && !seen.refused);
     await signIn.screenshot({ path: path.join(out, '14-sign-in-page.png'), timeout: 10000 }).catch(() => {});
     await shell.click('#btn-home');

@@ -264,28 +264,18 @@ function createWindow() {
     }
     callback({ requestHeaders: headers });
   });
-  const matchIdentity = (url) => {
-    const wanted = isSignInUrl(url) ? SIGN_IN_UA : CHROME_UA;
-    if (wc.getUserAgent() !== wanted) wc.setUserAgent(wanted);
-  };
-  wc.on('will-redirect', (_event, url, _inPlace, isMainFrame) => {
-    if (isMainFrame) matchIdentity(url);
-  });
-  wc.on('did-start-navigation', (_event, url, _inPlace, isMainFrame) => {
-    if (isMainFrame) matchIdentity(url);
-  });
+  // Second variant: only the request headers change. The first variant also
+  // changed what the page's own scripts saw, and Google still refused; a page
+  // claiming Firefox while behaving like Chrome may itself have been the giveaway.
   wc.on('will-navigate', (event, url) => {
     if (!staysInApp(url)) {
       event.preventDefault();
       openOutside(url);
-      return;
     }
-    matchIdentity(url);
   });
   wc.setWindowOpenHandler(({ url }) => {
     if (staysInApp(url)) {
       // Keep sign-in and other Google/YouTube links in this window.
-      matchIdentity(url);
       wc.loadURL(url);
     } else {
       openOutside(url);
