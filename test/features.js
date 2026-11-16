@@ -61,7 +61,7 @@ async function waitForSong(ytm) {
         const bar = document.querySelector('ytmusic-player-bar');
         const ad = bar.querySelector('.badge-style-type-ad-stark');
         const v = document.querySelector('video');
-        return !(ad && ad.offsetParent) && v && v.duration > 0 && bar.querySelector('#progress-bar').offsetParent !== null;
+        return !(ad && ad.offsetParent) && !document.querySelector('ytmusic-player .ad-showing') && !/after ad/i.test(bar.textContent) && v && v.duration > 0 && bar.querySelector('#progress-bar').offsetParent !== null;
       }),
     120000,
     1000,
@@ -191,7 +191,7 @@ async function waitForSong(ytm) {
   check('Glass switch makes the page see-through', Boolean(g) && g.base === 'transparent' && g.html === 'rgba(0, 0, 0, 0)' && g.nav === 'rgba(0, 0, 0, 0)', JSON.stringify(g));
   const alpha = g ? Number((g.panel.match(/[\d.]+(?=\)$)/) || [1])[0]) : 1;
   check('Panels are tinted glass with a bright edge', Boolean(g) && alpha > 0.2 && alpha < 0.8 && g.edge === '1px', g ? g.panel : '');
-  check('Title bar and settings panel go glass too', await shell.evaluate(() => document.documentElement.classList.contains('glass') && getComputedStyle(document.body).backgroundColor === 'rgba(0, 0, 0, 0)'));
+  check('Title bar and settings panel go glass, tinted with the chosen colors', await shell.evaluate(() => document.documentElement.classList.contains('glass') && getComputedStyle(document.body).backgroundImage.includes('gradient') && getComputedStyle(document.documentElement).backgroundColor === 'rgba(0, 0, 0, 0)'));
   const during = await main(app);
   check('Window stays resizable and in place', during.resizable && during.count === 1 && ['x', 'y', 'width', 'height'].every((k) => during.bounds[k] === before.bounds[k]));
   check('Music keeps playing through the switch (no reload)', await ytm.evaluate(() => window.__ytmdSamePage === 1 && !document.querySelector('video').paused));

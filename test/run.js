@@ -109,7 +109,7 @@ async function waitForSong(ytm, timeout = 120000) {
         const ad = bar.querySelector('.badge-style-type-ad-stark');
         const adShowing = ad && ad.offsetParent;
         const v = document.querySelector('video');
-        return !adShowing && v && v.duration > 0 && bar.querySelector('#progress-bar').offsetParent !== null;
+        return !adShowing && !document.querySelector('ytmusic-player .ad-showing') && !/after ad/i.test(bar.textContent) && v && v.duration > 0 && bar.querySelector('#progress-bar').offsetParent !== null;
       });
     },
     timeout,

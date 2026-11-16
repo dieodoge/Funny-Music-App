@@ -84,7 +84,7 @@ function variablesCss(input, options = {}) {
   const vars = `:root{
   --app-accent:${p.accent};--app-bg:${p.bg};--app-text:${p.text};
   --app-base:${glass ? 'transparent' : p.base};
-  --app-panel:${glass ? `color-mix(in srgb, ${p.bg} 46%, transparent)` : p.bg};
+  --app-panel:${glass ? `color-mix(in srgb, ${p.bg} 52%, transparent)` : p.bg};
   --app-surface:${glass ? `color-mix(in srgb, ${p.text} 9%, transparent)` : p.surface};
   --app-surface2:${glass ? `color-mix(in srgb, ${p.text} 16%, transparent)` : p.surface2};
   --app-border:${glass ? `color-mix(in srgb, ${p.text} 16%, transparent)` : p.border};
@@ -97,8 +97,8 @@ function variablesCss(input, options = {}) {
   return `${vars}
 /* Panels become glossy sheets: a light sheen across the top-left, a fine bright edge. */
 ytmusic-app::before,ytmusic-app::after{
-  background:linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04) 32%, transparent 60%), var(--app-panel) !important;
-  border:1px solid color-mix(in srgb, ${p.text} 18%, transparent);
+  background:linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 32%, transparent 55%, color-mix(in srgb, ${p.accent} 12%, transparent)), var(--app-panel) !important;
+  border:1px solid color-mix(in srgb, ${p.accent} 34%, color-mix(in srgb, ${p.text} 16%, transparent));
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.28), 0 10px 30px rgba(0,0,0,0.18);
   box-sizing:border-box;
 }
@@ -115,7 +115,7 @@ ytmusic-app-layout[player-page-open] > #content{visibility:hidden !important;}
 /* Keep scrolling content from showing through the see-through top and bottom bars. */
 ytmusic-app-layout > #content{
   --ytmd-top:calc(var(--ytmd-scroll,0px) + 64px);
-  --ytmd-end:calc(var(--ytmd-scroll,0px) + 100vh - var(--ytmd-bottom,88px));
+  --ytmd-end:calc(var(--ytmd-scroll,0px) + 100vh - var(--ytmd-bottom,88px) - 9px);
   clip-path:polygon(0 var(--ytmd-top),100% var(--ytmd-top),100% var(--ytmd-end),0 var(--ytmd-end));
 }
 ytmusic-app:has(ytmusic-app-layout[player-ui-state='INACTIVE']){--ytmd-bottom:0px;}`;

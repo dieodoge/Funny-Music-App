@@ -26,7 +26,8 @@ const SIGN_IN_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20
 
 function isSignInUrl(url) {
   try {
-    return new URL(url).hostname === 'accounts.google.com';
+    // accounts.google.com, its country versions, and YouTube's own account host.
+    return /^accounts\.(google\.[a-z.]{2,6}|youtube\.com)$/.test(new URL(url).hostname);
   } catch {
     return false;
   }

@@ -89,6 +89,31 @@ function markScroll() {
   document.documentElement.style.setProperty('--ytmd-scroll', `${window.scrollY}px`);
 }
 
+// The current track's artwork. Depending on the track and the window size the
+// page keeps it in different places, so several are tried; any that failed to
+// load is skipped next time.
+const brokenArt = new Set();
+function currentArt() {
+  const found = [];
+  const add = (url) => {
+    if (typeof url === 'string' && /^https:/.test(url) && !brokenArt.has(url)) found.push(url);
+  };
+  const big = document.querySelector('ytmusic-player #song-image img');
+  add(big && big.src);
+  try {
+    const art = (navigator.mediaSession.metadata && navigator.mediaSession.metadata.artwork) || [];
+    for (const item of [...art].reverse()) add(item.src); // largest is listed last
+  } catch {
+    /* no media info yet */
+  }
+  const small = document.querySelector('ytmusic-player-bar .thumbnail-image-wrapper img, ytmusic-player-bar img.image');
+  add(small && small.src && small.src.replace(/=w\d+-h\d+/, '=w544-h544'));
+  add(small && small.src);
+  const queue = document.querySelector('ytmusic-player-queue-item[selected] img');
+  add(queue && queue.src);
+  return found[0] || '';
+}
+
 // When the player is in video mode but no picture arrives, show the album art.
 let noPictureSince = 0;
 function checkVideoPicture() {
@@ -107,8 +132,7 @@ function checkVideoPicture() {
   if (!noPictureSince) noPictureSince = Date.now();
   // Give a real video a few seconds to start before deciding there is none.
   if (Date.now() - noPictureSince < 3000) return;
-  const thumb = document.querySelector('ytmusic-player-bar .thumbnail-image-wrapper img');
-  const src = thumb && thumb.src ? thumb.src.replace(/=w\d+-h\d+/, '=w544-h544') : '';
+  const src = currentArt();
   if (!src) return;
   player.style.setProperty('--ytmd-art', `url("${src.replace(/["\\\n]/g, '')}")`);
   if (!player.hasAttribute('ytmd-no-video')) player.setAttribute('ytmd-no-video', '');
@@ -146,6 +170,14 @@ function buildCase() {
   front.append(el('div', 'hinge'), el('img'));
   const back = el('div', 'face back');
   back.append(el('img'), el('b'), el('span'));
+  for (const img of [front.querySelector('img'), back.querySelector('img')]) {
+    img.alt = '';
+    img.draggable = false;
+    // If this picture cannot be loaded, remember it so the next source is used.
+    img.addEventListener('error', () => {
+      if (img.src) brokenArt.add(img.src);
+    });
+  }
   box.append(front, back);
   for (const side of ['left', 'right', 'top', 'bottom']) box.append(el('div', `face side ${side}`));
   host.append(el('div', 'shadow'), box);
@@ -222,8 +254,7 @@ function syncCase() {
 
   const host = spin.el || buildCase();
   if (!host.isConnected) document.body.append(host);
-  const thumb = document.querySelector('ytmusic-player-bar .thumbnail-image-wrapper img');
-  const src = thumb && thumb.src ? thumb.src.replace(/=w\d+-h\d+/, '=w544-h544') : '';
+  const src = currentArt();
   for (const img of host.querySelectorAll('img')) {
     if (src && img.src !== src) img.src = src;
   }

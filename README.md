@@ -58,10 +58,8 @@ its checks this may stop working.
 
 ## Sharing with friends
 
-Send them `dist\YTM Desktop Setup 1.2.1.exe` (about 116 MB). It installs the app
-with its own shortcuts. Windows will warn that the publisher is unknown because
-the app is not signed: "More info" then "Run anyway". Each person uses their
-own account and gets their own colors.
+On hold until the app is finished. When it is, run the build with the installer
+(`npx electron-builder --win nsis`) and send the Setup file it puts in `dist`.
 
 ## For rebuilding (only needed after changing the code)
 
