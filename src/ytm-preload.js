@@ -15,6 +15,36 @@ function albumLink() {
   return null;
 }
 
+// Music videos have no album link, but when one was started from an album the
+// page address names that album's playlist ("list=OLAK5uy_..."). Remember it so
+// the button can still open the album after browsing elsewhere.
+let albumListId = '';
+function rememberAlbumList() {
+  if (location.pathname !== '/watch') return;
+  const list = new URL(location.href).searchParams.get('list') || '';
+  albumListId = /^OLAK5uy_[\w-]+$/.test(list) ? list : '';
+}
+
+// What the album button opens: the album link, else the remembered album playlist.
+function albumTarget() {
+  const link = albumLink();
+  if (link) return { name: link.textContent.trim(), open: () => link.click() };
+  if (!albumListId || !hasTrack()) return null;
+  const id = albumListId;
+  return {
+    name: '',
+    // The page's own navigation, so the music keeps playing.
+    open: () =>
+      document.querySelector('ytmusic-app').dispatchEvent(
+        new CustomEvent('yt-navigate', {
+          bubbles: true,
+          composed: true,
+          detail: { endpoint: { browseEndpoint: { browseId: `VL${id}` } } },
+        }),
+      ),
+  };
+}
+
 function hasTrack() {
   const title = document.querySelector('ytmusic-player-bar .title');
   return Boolean(title && title.textContent.trim());
@@ -44,9 +74,8 @@ function buildButton() {
   button.append(svg, label);
   button.addEventListener('click', (event) => {
     event.stopPropagation();
-    const link = albumLink();
-    if (!link) return;
-    link.click();
+    const target = albumTarget();
+    if (target) target.open();
   });
   return button;
 }
@@ -62,11 +91,14 @@ function sync() {
   // First item in the right-hand group, just before the volume control.
   if (button.parentElement !== host || host.firstElementChild !== button) host.prepend(button);
 
-  const link = albumLink();
-  const disabled = !link;
+  rememberAlbumList();
+  const target = albumTarget();
+  const disabled = !target;
   if (button.disabled !== disabled) button.disabled = disabled;
-  const tip = link
-    ? `View full album: ${link.textContent.trim()}`
+  const tip = target
+    ? target.name
+      ? `View full album: ${target.name}`
+      : 'View full album'
     : hasTrack()
       ? 'This track has no album page'
       : 'Play something to see its album';
@@ -237,14 +269,18 @@ function syncCase() {
   const root = document.documentElement;
   const player = document.querySelector('ytmusic-player');
   const advert = advertShowing();
-  root.toggleAttribute('ytmd-ad', advert);
+  const videoShown = Boolean(player && player.querySelector('#song-video') && player.querySelector('#song-video').getClientRects().length);
+  // Adverts and music videos keep the plain rectangle (a wide video cropped
+  // into a circle becomes a squashed oval).
+  root.toggleAttribute('ytmd-ad', advert || videoShown);
 
   const wanted =
     getComputedStyle(root).getPropertyValue('--app-case3d').trim() === '1' &&
     player &&
     player.getAttribute('player-ui-state') === 'MINIPLAYER' &&
     player.getAttribute('playback-mode') === 'ATV_PREFERRED' &&
-    !advert;
+    !advert &&
+    !videoShown;
 
   if (!wanted) {
     if (spin.el && !spin.el.hidden) spin.el.hidden = true;

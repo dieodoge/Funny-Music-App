@@ -342,7 +342,7 @@ ytmusic-player-bar {
   height: var(--app-bar-h) !important;
   background: var(--app-base) !important;
   grid-template-areas: 'middle start end' !important;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr) !important;
+  grid-template-columns: minmax(0, 34fr) minmax(0, 32fr) minmax(0, 34fr) !important;
   color: var(--app-muted);
 }
 
@@ -358,7 +358,7 @@ ytmusic-player-bar .thumbnail-image-wrapper .image {
 }
 
 ytmusic-player-bar .content-info-wrapper {
-  min-width: 0;
+  min-width: 64px;
   flex: 0 1 auto !important;
   max-width: none !important;
 }
@@ -447,8 +447,8 @@ ytmusic-player-bar .time-info {
 }
 
 ytmusic-player-bar #progress-bar {
-  left: 30% !important;
-  width: 40% !important;
+  left: 34% !important;
+  width: 32% !important;
   top: 42px !important;
   bottom: auto !important;
   margin: 0 !important;
@@ -802,4 +802,38 @@ html[ytmd-case-on] ytmusic-player[player-ui-state='MINIPLAYER'] {
   border-radius: 50%;
   background: radial-gradient(rgba(0, 0, 0, 0.5), transparent 70%);
   pointer-events: none;
+}
+
+/* ---------- keeping the player bar tidy at every window width ---------- */
+
+ytmusic-player-bar .middle-controls-buttons,
+ytmusic-player-bar .thumbnail-image-wrapper {
+  flex: none !important;
+}
+
+ytmusic-player-bar #right-controls {
+  min-width: 0;
+}
+
+/* Small windows: the album button keeps its icon and drops the word. */
+@media (max-width: 900px) {
+  #ytmd-album-button {
+    padding: 0 7px;
+    margin-right: 4px;
+  }
+
+  #ytmd-album-button span {
+    display: none;
+  }
+}
+
+/* Very small windows: thumbs up/down move out of the way of the title. */
+@media (max-width: 700px) {
+  ytmusic-player-bar #like-button-renderer {
+    display: none !important;
+  }
+}
+
+ytmusic-nav-bar .center-content {
+  margin-right: 12px;
 }

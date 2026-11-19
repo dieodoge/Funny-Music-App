@@ -259,7 +259,7 @@ async function main() {
   // ---------- 6. playback, player bar and album button (signed out, muted) ----------
   await until(() => ytm.evaluate(() => Boolean(document.querySelector('ytmusic-browse-response ytmusic-play-button-renderer'))), 30000);
   await sleep(1500);
-  await ytm.evaluate(() => document.querySelector('ytmusic-browse-response ytmusic-play-button-renderer').click());
+  await require('./pick-song')(ytm, until, sleep);
   const song = await waitForSong(ytm);
   if (!song) {
     note('Playback checks', 'no song started within 2 minutes (adverts or network), so player-bar checks were not run');
@@ -316,13 +316,13 @@ async function main() {
     const titleBefore = await trackTitle(ytm);
     await ytm.evaluate(() => { window.__ytmdSamePage = 1; });
     await ytm.click('#ytmd-album-button');
-    const onAlbum = await until(() => /browse\/MPRE|playlist\?list=OLAK/.test(ytm.url()), 15000);
+    const onAlbum = await until(() => /browse\/MPRE|browse\/VLOLAK|playlist\?list=OLAK/.test(ytm.url()), 15000);
     check('Album button opens the album page', Boolean(onAlbum), ytm.url());
     await until(() => ytm.evaluate(() => Boolean(document.querySelector('ytmusic-responsive-header-renderer, ytmusic-detail-header-renderer'))), 15000);
     await sleep(2500);
     const albumPage = await ytm.evaluate(() => ({
       heading: (document.querySelector('ytmusic-responsive-header-renderer .title, ytmusic-detail-header-renderer .title')?.textContent || '').trim(),
-      tracks: document.querySelectorAll('ytmusic-shelf-renderer ytmusic-responsive-list-item-renderer').length,
+      tracks: document.querySelectorAll('ytmusic-browse-response ytmusic-responsive-list-item-renderer').length,
       playerPageOpen: Boolean(document.querySelector('ytmusic-app-layout')?.hasAttribute('player-page-open')),
     }));
     check('Album opens without reloading the page', await ytm.evaluate(() => window.__ytmdSamePage === 1));

@@ -84,7 +84,7 @@ function variablesCss(input, options = {}) {
   const vars = `:root{
   --app-accent:${p.accent};--app-bg:${p.bg};--app-text:${p.text};
   --app-base:${glass ? 'transparent' : p.base};
-  --app-panel:${glass ? `color-mix(in srgb, ${p.bg} 52%, transparent)` : p.bg};
+  --app-panel:${glass ? `color-mix(in srgb, ${p.bg} 26%, transparent)` : p.bg};
   --app-surface:${glass ? `color-mix(in srgb, ${p.text} 9%, transparent)` : p.surface};
   --app-surface2:${glass ? `color-mix(in srgb, ${p.text} 16%, transparent)` : p.surface2};
   --app-border:${glass ? `color-mix(in srgb, ${p.text} 16%, transparent)` : p.border};

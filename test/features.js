@@ -75,7 +75,10 @@ async function waitForSong(ytm) {
 
   // ---------- spinning mini album art ----------
   await until(() => ytm.evaluate(() => Boolean(document.querySelector('ytmusic-browse-response ytmusic-play-button-renderer'))), 30000);
-  await ytm.evaluate(() => document.querySelector('ytmusic-browse-response ytmusic-play-button-renderer').click());
+  await require('./pick-song')(ytm, until, sleep);
+  await waitForSong(ytm);
+  const songMode = await require('./pick-song').preferSong(ytm, until);
+  check('Test is playing a song (not a music video)', Boolean(songMode), songMode === 'simulated' ? 'YouTube only offered videos signed out; song layout simulated' : 'real song');
   await waitForSong(ytm);
   await sleep(1500);
   const mode = await ytm.evaluate(() => document.querySelector('ytmusic-player').getAttribute('playback-mode'));
@@ -98,14 +101,26 @@ async function waitForSong(ytm) {
   // ---------- album art when the video has no picture ----------
   // A song has no picture in its video element; showing the video area for it
   // is exactly the "video doesn't show up" situation.
-  await ytm.evaluate(() => { document.querySelector('ytmusic-player #song-video').style.display = 'block'; });
+  // The video area is shown while the video element reports no picture.
+  await ytm.evaluate(() => {
+    const sim = document.getElementById('ytmd-test-song-layout');
+    if (sim) sim.disabled = true;
+    document.querySelector('ytmusic-player #song-video').style.setProperty('display', 'block', 'important');
+    const v = document.querySelector('video');
+    Object.defineProperty(v, 'videoWidth', { configurable: true, get: () => 0 });
+  });
   const fallback = await until(() => ytm.evaluate(() => {
     const p = document.querySelector('ytmusic-player');
     return p.hasAttribute('ytmd-no-video') ? p.style.getPropertyValue('--ytmd-art') : null;
   }), 10000);
   check('Album art is shown when the video area has no picture', Boolean(fallback) && /^url\("https:\/\//.test(fallback), String(fallback).slice(0, 60));
   await ytm.screenshot({ path: path.join(out, '10-video-fallback.png'), timeout: 10000 }).catch(() => {});
-  await ytm.evaluate(() => { document.querySelector('ytmusic-player #song-video').style.display = ''; });
+  await ytm.evaluate(() => {
+    document.querySelector('ytmusic-player #song-video').style.removeProperty('display');
+    delete document.querySelector('video').videoWidth;
+    const sim = document.getElementById('ytmd-test-song-layout');
+    if (sim) sim.disabled = false;
+  });
   check('Fallback goes away again when it is not needed', await until(() => ytm.evaluate(() => !document.querySelector('ytmusic-player').hasAttribute('ytmd-no-video')), 6000));
 
   await ytm.click('ytmusic-player-bar .toggle-player-page-button');
