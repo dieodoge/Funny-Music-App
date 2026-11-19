@@ -193,7 +193,9 @@ body.maximized .icon-restore {
   bottom: 0;
   width: var(--drawer-w);
   padding: 4px 8px 8px 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 #drawer[hidden] {
@@ -202,8 +204,11 @@ body.maximized .icon-restore {
 
 #drawer::before {
   content: '';
-  position: absolute;
-  inset: 0 8px 8px 0;
+  position: fixed;
+  top: var(--titlebar-h);
+  right: 8px;
+  bottom: 8px;
+  width: calc(var(--drawer-w) - 8px);
   border-radius: 12px;
   background: var(--app-bg);
   z-index: -1;
@@ -422,9 +427,9 @@ html.glass #titlebar {
    accent glowing from the top-left corner, the background color everywhere
    else. This page sits behind the music page, so it tints that too. */
 html.glass body {
-  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--app-accent) 22%, transparent), transparent 62%),
-    radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, var(--app-accent) 12%, transparent), transparent 60%),
-    color-mix(in srgb, var(--app-bg) 20%, transparent);
+  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--app-accent) 14%, transparent), transparent 62%),
+    radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, var(--app-accent) 8%, transparent), transparent 60%),
+    color-mix(in srgb, var(--app-bg) 10%, transparent);
 }
 
 html.glass .tb-btn,
@@ -452,4 +457,21 @@ html.glass .reset,
 html.glass .color-row,
 html.glass input[type='color'] {
   border-color: color-mix(in srgb, var(--app-text) 18%, transparent);
+}
+
+/* Two-word preset names ("Raspberry & Blush") fit on two short lines. */
+.preset span {
+  line-height: 1.25;
+  min-height: 2.5em;
+  display: flex;
+  align-items: flex-end;
+}
+
+#drawer::-webkit-scrollbar {
+  width: 6px;
+}
+
+#drawer::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--app-text) 22%, transparent);
+  border-radius: 3px;
 }

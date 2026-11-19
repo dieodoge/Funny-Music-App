@@ -488,7 +488,7 @@ ytmusic-player-bar #right-controls {
   align-items: center;
   gap: 6px;
   height: 30px;
-  margin: 0 10px 0 0;
+  margin: 0 6px 0 10px;
   padding: 0 12px 0 9px;
   border: 1px solid var(--app-border);
   border-radius: 999px;
@@ -806,31 +806,95 @@ html[ytmd-case-on] ytmusic-player[player-ui-state='MINIPLAYER'] {
 
 /* ---------- keeping the player bar tidy at every window width ---------- */
 
+/* Fixed proportions: track info | controls + seek bar | volume and extras.
+   The seek bar is placed with the same numbers so it always sits under the
+   buttons, and nothing in one column can push into the next. */
+ytmusic-player-bar {
+  --ytmd-left: 30%;
+  --ytmd-mid: 40%;
+  grid-template-columns: var(--ytmd-left) var(--ytmd-mid) minmax(0, 1fr) !important;
+}
+
+ytmusic-player-bar #progress-bar {
+  left: calc(var(--ytmd-left) + 12px) !important;
+  width: calc(var(--ytmd-mid) - 24px) !important;
+}
+
+ytmusic-player-bar .middle-controls,
+ytmusic-player-bar #left-controls,
+ytmusic-player-bar #right-controls {
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+ytmusic-player-bar .middle-controls {
+  padding-left: 14px;
+  gap: 2px;
+}
+
+ytmusic-player-bar .thumbnail-image-wrapper,
 ytmusic-player-bar .middle-controls-buttons,
-ytmusic-player-bar .thumbnail-image-wrapper {
+#ytmd-album-button {
   flex: none !important;
 }
 
-ytmusic-player-bar #right-controls {
-  min-width: 0;
+/* The title and artist take whatever room is left and cut off neatly. */
+ytmusic-player-bar .content-info-wrapper {
+  flex: 1 1 auto !important;
+  min-width: 48px !important;
+  overflow: hidden;
 }
 
-/* Small windows: the album button keeps its icon and drops the word. */
+ytmusic-player-bar .content-info-wrapper .title,
+ytmusic-player-bar .content-info-wrapper .byline {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+ytmusic-player-bar #right-controls {
+  justify-content: flex-end !important;
+  gap: 2px;
+}
+
+/* Medium windows: the like / dislike / menu buttons are on the now-playing
+   page anyway, so they make way for the title here. */
+@media (max-width: 1320px) {
+  ytmusic-player-bar .middle-controls-buttons {
+    display: none !important;
+  }
+}
+
+/* Small windows: the album button keeps its icon and drops the word, and the
+   controls column gets a little more of the width. */
 @media (max-width: 900px) {
+  ytmusic-player-bar {
+    --ytmd-left: 32%;
+    --ytmd-mid: 42%;
+  }
+
   #ytmd-album-button {
     padding: 0 7px;
-    margin-right: 4px;
+    margin: 0 4px;
   }
 
   #ytmd-album-button span {
     display: none;
   }
+
+  ytmusic-player-bar .time-info {
+    font-size: 10px !important;
+  }
 }
 
-/* Very small windows: thumbs up/down move out of the way of the title. */
-@media (max-width: 700px) {
-  ytmusic-player-bar #like-button-renderer {
+/* Very small windows: the art thumbnail goes, the title keeps its room. */
+@media (max-width: 600px) {
+  ytmusic-player-bar .thumbnail-image-wrapper {
     display: none !important;
+  }
+
+  ytmusic-player-bar .middle-controls {
+    padding-left: 10px;
   }
 }
 

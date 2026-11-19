@@ -2,6 +2,8 @@
 // button in the player bar: it finds the album link YouTube Music already
 // shows for the current track and opens it when the button is clicked.
 
+const { ipcRenderer } = require('electron');
+
 const BUTTON_ID = 'ytmd-album-button';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -83,13 +85,16 @@ function buildButton() {
 function sync() {
   const bar = document.querySelector('ytmusic-player-bar');
   if (!bar) return;
-  const host = bar.querySelector('#right-controls');
-  if (!host) return;
+  // At some widths the page keeps two copies of the title block and hides one;
+  // the button goes right after whichever one is showing.
+  // (At those widths there can even be two player bars, so search them all.)
+  const blocks = [...document.querySelectorAll('ytmusic-player-bar .content-info-wrapper')];
+  const info = blocks.find((block) => block.getBoundingClientRect().width > 0) || blocks[0];
+  if (!info) return;
 
   let button = document.getElementById(BUTTON_ID);
   if (!button) button = buildButton();
-  // First item in the right-hand group, just before the volume control.
-  if (button.parentElement !== host || host.firstElementChild !== button) host.prepend(button);
+  if (info.nextElementSibling !== button) info.after(button);
 
   rememberAlbumList();
   const target = albumTarget();
@@ -117,9 +122,6 @@ function markPlaying() {
 }
 
 // Scroll position, used in see-through mode to keep content out from under the bars.
-function markScroll() {
-  document.documentElement.style.setProperty('--ytmd-scroll', `${window.scrollY}px`);
-}
 
 // The current track's artwork. Depending on the track and the window size the
 // page keeps it in different places, so several are tried; any that failed to
@@ -265,17 +267,28 @@ function turnCase(now) {
   spin.frame = requestAnimationFrame(turnCase);
 }
 
+function videoAreaShown() {
+  const area = document.querySelector('ytmusic-player #song-video');
+  return Boolean(area && area.getClientRects().length);
+}
+
+// Settings sent by the app (see main.js): currently only the 3D case switch.
+const options = { case3d: false };
+ipcRenderer.on('ytmd-options', (_event, next) => {
+  Object.assign(options, next || {});
+});
+
 function syncCase() {
   const root = document.documentElement;
   const player = document.querySelector('ytmusic-player');
   const advert = advertShowing();
-  const videoShown = Boolean(player && player.querySelector('#song-video') && player.querySelector('#song-video').getClientRects().length);
+  const videoShown = videoAreaShown();
   // Adverts and music videos keep the plain rectangle (a wide video cropped
   // into a circle becomes a squashed oval).
   root.toggleAttribute('ytmd-ad', advert || videoShown);
 
   const wanted =
-    getComputedStyle(root).getPropertyValue('--app-case3d').trim() === '1' &&
+    options.case3d &&
     player &&
     player.getAttribute('player-ui-state') === 'MINIPLAYER' &&
     player.getAttribute('playback-mode') === 'ATV_PREFERRED' &&
@@ -327,15 +340,28 @@ function scheduleSync() {
 
 function start() {
   if (location.hostname !== 'music.youtube.com') return;
-  new MutationObserver(scheduleSync).observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['href'],
-  });
-  // Safety net for changes made while the window is hidden (no animation frames).
+  // Watch only the player bar (title, artist and album links live there); the
+  // rest of the page changes constantly and is not needed.
+  const watchBar = () => {
+    const bar = document.querySelector('ytmusic-player-bar');
+    if (!bar) return false;
+    new MutationObserver(scheduleSync).observe(bar, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['href'],
+    });
+    return true;
+  };
+  if (!watchBar()) {
+    const waitForBar = setInterval(() => {
+      if (watchBar()) clearInterval(waitForBar);
+    }, 500);
+  }
+  // Safety net, and the page address (for album playlists) is not in the bar.
   setInterval(() => {
+    if (document.hidden) return;
     try {
       sync();
     } catch {
@@ -344,13 +370,19 @@ function start() {
   }, 2000);
   scheduleSync();
 
+  // In glass mode the page scrolls inside the main panel; a newly opened page
+  // starts at its top, as it does when the whole window scrolls.
+  window.addEventListener('yt-navigate-finish', () => {
+    const panel = document.querySelector('ytmusic-app-layout > #content');
+    if (panel && panel.scrollTop) panel.scrollTop = 0;
+  });
+
   // Media events do not bubble, so listen during the capture phase.
   for (const type of ['play', 'playing', 'pause', 'ended', 'emptied']) {
     document.addEventListener(type, markPlaying, true);
   }
-  window.addEventListener('scroll', markScroll, { passive: true });
-  markScroll();
   setInterval(() => {
+    if (document.hidden) return;
     try {
       markPlaying();
       checkVideoPicture();
@@ -359,12 +391,17 @@ function start() {
     }
   }, 1000);
   setInterval(() => {
+    // Nothing to do unless the 3D case is switched on (or still showing).
+    if (document.hidden || (!options.case3d && !(spin.el && !spin.el.hidden))) {
+      if (!options.case3d) document.documentElement.toggleAttribute('ytmd-ad', advertShowing() || videoAreaShown());
+      return;
+    }
     try {
       syncCase();
     } catch {
       /* ignore */
     }
-  }, 400);
+  }, 500);
 }
 
 if (document.readyState === 'loading') {

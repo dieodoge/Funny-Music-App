@@ -195,7 +195,7 @@ async function waitForSong(ytm) {
   const glassVars = () => ytm.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     return { glass: cs.getPropertyValue('--app-glass').trim(), base: cs.getPropertyValue('--app-base').trim(), html: cs.backgroundColor,
-      nav: getComputedStyle(document.querySelector('#nav-bar-background')).backgroundColor,
+      nav: getComputedStyle(document.querySelector('#nav-bar-background')).backgroundColor, scroller: getComputedStyle(document.querySelector('ytmusic-app-layout > #content')).position + '/' + getComputedStyle(document.querySelector('ytmusic-app-layout > #content')).overflowY, pageLayer: getComputedStyle(document.querySelector('ytmusic-browse-response, ytmusic-app-layout > #content > *')).backgroundColor,
       panel: getComputedStyle(document.querySelector('ytmusic-app'), '::after').backgroundColor,
       edge: getComputedStyle(document.querySelector('ytmusic-app'), '::after').borderTopWidth };
   });
@@ -203,9 +203,10 @@ async function waitForSong(ytm) {
   await ytm.evaluate(() => { window.__ytmdSamePage = 1; });
   await shell.click('#toggle-glass');
   const g = await until(async () => { const v = await glassVars(); return v.glass === '1' ? v : null; }, 6000);
-  check('Glass switch makes the page see-through', Boolean(g) && g.base === 'transparent' && g.html === 'rgba(0, 0, 0, 0)' && g.nav === 'rgba(0, 0, 0, 0)', JSON.stringify(g));
+  check('Glass switch makes the page see-through', Boolean(g) && g.base === 'transparent' && g.html === 'rgba(0, 0, 0, 0)' && Number((g.nav.match(/[\d.]+(?=\)$)/) || [1])[0]) < 0.5 && g.pageLayer === 'rgba(0, 0, 0, 0)', JSON.stringify(g));
+  check('In glass mode the page scrolls inside the main panel', Boolean(g) && g.scroller === 'fixed/auto', g ? g.scroller : '');
   const alpha = g ? Number((g.panel.match(/[\d.]+(?=\)$)/) || [1])[0]) : 1;
-  check('Panels are tinted glass with a bright edge', Boolean(g) && alpha > 0.2 && alpha < 0.8 && g.edge === '1px', g ? g.panel : '');
+  check('Panels are lightly tinted glass with a bright edge', Boolean(g) && alpha > 0.05 && alpha < 0.5 && g.edge === '1px', g ? g.panel : '');
   check('Title bar and settings panel go glass, tinted with the chosen colors', await shell.evaluate(() => document.documentElement.classList.contains('glass') && getComputedStyle(document.body).backgroundImage.includes('gradient') && getComputedStyle(document.documentElement).backgroundColor === 'rgba(0, 0, 0, 0)'));
   const during = await main(app);
   check('Window stays resizable and in place', during.resizable && during.count === 1 && ['x', 'y', 'width', 'height'].every((k) => during.bounds[k] === before.bounds[k]));

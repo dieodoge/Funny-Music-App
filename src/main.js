@@ -127,6 +127,18 @@ function layout() {
     width: Math.max(0, width - drawer),
     height: Math.max(0, height - TITLE_BAR_HEIGHT),
   });
+  fitPage(width - drawer);
+}
+
+// Below about 800px YouTube Music switches to a cramped phone-style player bar.
+// When the music area gets that narrow (a small window with the Colors panel
+// open), the page is shown slightly smaller instead, so it keeps its normal layout.
+const NARROWEST_PAGE = 800;
+function fitPage(pageWidth) {
+  if (!view || pageWidth <= 0) return;
+  const zoom = pageWidth < NARROWEST_PAGE ? Math.max(0.6, pageWidth / NARROWEST_PAGE) : 1;
+  const wc = view.webContents;
+  if (Math.abs(wc.getZoomFactor() - zoom) > 0.001) wc.setZoomFactor(zoom);
 }
 
 function sendToShell(channel, payload) {
@@ -162,6 +174,7 @@ const layoutCss = () => fs.readFileSync(path.join(__dirname, 'ytm-style.css'), '
 
 async function applyVariables() {
   if (!view || !isMusicPage(view.webContents)) return;
+  view.webContents.send('ytmd-options', { case3d: store.case3d });
   const previous = variablesKey;
   try {
     variablesKey = await view.webContents.insertCSS(theme.variablesCss(store.colors, { glass: store.glass, case3d: store.case3d }));
@@ -240,6 +253,7 @@ function createWindow() {
 
   wc.on('dom-ready', async () => {
     variablesKey = null;
+    layout(); // re-apply the page size after a page load
     if (!isMusicPage(wc)) return;
     try {
       await wc.insertCSS(layoutCss());

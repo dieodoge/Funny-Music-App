@@ -280,7 +280,7 @@ async function main() {
     const mid = info.width / 2;
     check('Player bar: art + title + artist on the left', info.art.x < 60 && info.title.x < mid / 2 && info.title.w > 40 && info.artist.length > 0 && info.artSrc.length > 0, info.artist);
     check('Player bar: prev / play / next centered with seek bar below', Math.abs(info.controls.x + info.controls.w / 2 - mid) < 30 && Math.abs(info.seek.x + info.seek.w / 2 - mid) < 30 && info.seek.y + info.seek.h / 2 > info.controls.y + info.controls.h / 2);
-    check('Player bar: volume and album button on the right', info.volume.x > mid && info.album.x > mid && info.album.w > 0);
+    check('Player bar: album button beside the title, volume on the right', info.album.w > 0 && info.album.x > info.title.x && info.album.x < mid && (info.volume.w === 0 || info.volume.x > mid), `album at ${Math.round(info.album.x)}, title at ${Math.round(info.title.x)}`);
     await shot(ytm, '05-player-bar.png', true);
     await shot(ytm, '06-now-playing.png');
 
