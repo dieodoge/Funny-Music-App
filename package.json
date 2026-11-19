@@ -1,7 +1,7 @@
 {
   "name": "ytm-desktop",
   "productName": "YTM Desktop",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Personal desktop window for YouTube Music with a custom layout and colors",
   "main": "src/main.js",
   "author": "Diego",

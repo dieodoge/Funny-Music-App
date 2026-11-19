@@ -2,6 +2,7 @@ const { app, BrowserWindow, WebContentsView, ipcMain, shell, screen, globalShort
 const fs = require('fs');
 const path = require('path');
 const theme = require('./theme');
+const lyrics = require('./lyrics');
 
 const HOME_URL = 'https://music.youtube.com/';
 const TITLE_BAR_HEIGHT = 44;
@@ -378,6 +379,16 @@ ipcMain.on('settings:set-case3d', (_event, on) => {
   store.case3d = Boolean(on);
   saveStoreSoon();
   applyTheme();
+});
+
+// Synced lyrics for the Lyrics tab (looked up on LRCLIB, see lyrics.js).
+ipcMain.handle('lyrics:get', async (event, query) => {
+  if (!view || event.sender !== view.webContents || !query || typeof query !== 'object') return null;
+  try {
+    return await lyrics.lookUp(query);
+  } catch (err) {
+    return { error: String(err && err.message ? err.message : err).slice(0, 200) };
+  }
 });
 
 ipcMain.on('drawer:set', (_event, open) => {

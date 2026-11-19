@@ -42,6 +42,11 @@ In the colors panel, under **Style**:
 
 Always on:
 
+- **Synced lyrics**: open the Lyrics tab on the now-playing page. When timed
+  lyrics exist on LRCLIB (https://lrclib.net), the line being sung lights up in
+  your accent colour and the view follows the song; click a line to jump there,
+  scroll to look around. Only the song title, artist, album and length are sent
+  to LRCLIB. Songs it does not have keep YouTube Music's normal lyrics.
 - **Spinning album disc**: with the 3D case off, the small album picture is a
   round disc that spins while music plays and stops when paused.
 - **Adverts stay rectangular**: during an advert the small picture is a plain

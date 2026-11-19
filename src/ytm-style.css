@@ -651,7 +651,7 @@ html[ytmd-case-on] ytmusic-player[player-ui-state='MINIPLAYER'] {
   width: 200px;
   height: 200px;
   perspective: 760px;
-  z-index: 4;
+  z-index: 2147483000;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -900,4 +900,123 @@ ytmusic-player-bar #right-controls {
 
 ytmusic-nav-bar .center-content {
   margin-right: 12px;
+}
+
+/* ---------- sidebar: keep its list and scrollbar inside the panel ---------- */
+
+ytmusic-app {
+  --ytmd-bottom: var(--app-bar-h);
+}
+
+ytmusic-app:has(ytmusic-app-layout[player-ui-state='INACTIVE']) {
+  --ytmd-bottom: 0px;
+}
+
+/* No arrow buttons on any scrollbar; just the slim rounded thumb. */
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* The sidebar's content stops at the panel's inner edges, so its scrollbar
+   sits inside the panel instead of on top of the border. */
+#guide[opened] ytmusic-guide-renderer {
+  box-sizing: border-box !important;
+  width: calc(240px - var(--app-gap)) !important;
+  height: calc(100vh - 64px - var(--ytmd-bottom) - var(--app-gap) - 6px) !important;
+  padding-right: 4px !important;
+  overflow: hidden !important;
+}
+
+ytmusic-guide-renderer ::-webkit-scrollbar {
+  width: 8px;
+}
+
+ytmusic-guide-renderer ::-webkit-scrollbar-thumb {
+  border-width: 2px;
+}
+
+ytmusic-guide-renderer #sections,
+ytmusic-guide-renderer #items {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-surface2) transparent;
+}
+
+/* ---------- synced lyrics (Lyrics tab) ---------- */
+
+ytmusic-tab-renderer[ytmd-synced] {
+  overflow: hidden !important;
+}
+
+/* YouTube Music's own block of lyrics steps aside while the synced ones show. */
+ytmusic-tab-renderer[ytmd-synced] > :not(#ytmd-lyrics) {
+  display: none !important;
+}
+
+#ytmd-lyrics {
+  position: relative;
+  height: 100%;
+  min-height: 240px;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Lines fade in at the top and out at the bottom. */
+#ytmd-lyrics .viewport {
+  position: absolute;
+  inset: 0 0 24px 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 16%, #000 80%, transparent);
+  mask-image: linear-gradient(transparent, #000 16%, #000 80%, transparent);
+}
+
+#ytmd-lyrics .lines {
+  padding: 0 14px 0 6px;
+  transition: transform 0.55s cubic-bezier(0.22, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+#ytmd-lyrics .line {
+  margin: 0 0 16px;
+  font: 700 22px/1.32 'YouTube Sans', 'Segoe UI Variable Display', 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--app-text) 34%, transparent);
+  cursor: pointer;
+  transform-origin: left center;
+  transition: color 0.35s ease, transform 0.35s ease, opacity 0.35s ease, text-shadow 0.35s ease;
+  text-shadow: none !important;
+}
+
+#ytmd-lyrics .line.past {
+  color: color-mix(in srgb, var(--app-text) 52%, transparent);
+}
+
+/* The line being sung: accent colour with a soft glow of the same colour. */
+#ytmd-lyrics .line.now {
+  color: var(--app-accent);
+  transform: scale(1.045);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--app-accent) 40%, transparent) !important;
+}
+
+#ytmd-lyrics .line.pause {
+  font-size: 18px;
+  letter-spacing: 0.3em;
+}
+
+#ytmd-lyrics .line:hover {
+  color: var(--app-text);
+}
+
+#ytmd-lyrics .line.now:hover {
+  color: var(--app-accent);
+}
+
+#ytmd-lyrics .credit {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  font: 500 11px/1 Roboto, 'Segoe UI', sans-serif;
+  color: var(--app-muted);
+  opacity: 0.8;
 }
