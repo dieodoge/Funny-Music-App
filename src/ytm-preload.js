@@ -257,7 +257,8 @@ function turnCase(now) {
   spin.last = now;
   if (!spin.dragging) {
     const playing = document.documentElement.hasAttribute('ytmd-playing');
-    const target = playing ? CASE_SPIN : 0;
+    // Full speed while music plays; a slow idle turn while paused.
+    const target = playing ? CASE_SPIN : CASE_SPIN * 0.25;
     // Ease from a flick (or a stop) back to the steady turning speed.
     spin.speed += (target - spin.speed) * Math.min(1, dt * 2.2);
     spin.y += spin.speed * dt;
@@ -281,19 +282,18 @@ ipcRenderer.on('ytmd-options', (_event, next) => {
 function syncCase() {
   const root = document.documentElement;
   const player = document.querySelector('ytmusic-player');
+  const layout = document.querySelector('ytmusic-app-layout');
+  const state = (layout && layout.getAttribute('player-ui-state')) || '';
   const advert = advertShowing();
   const videoShown = videoAreaShown();
   // Adverts and music videos keep the plain rectangle (a wide video cropped
-  // into a circle becomes a squashed oval).
+  // into a circle becomes a squashed oval). Only used by the flat disc.
   root.toggleAttribute('ytmd-ad', advert || videoShown);
 
-  const wanted =
-    options.case3d &&
-    player &&
-    player.getAttribute('player-ui-state') === 'MINIPLAYER' &&
-    player.getAttribute('playback-mode') === 'ATV_PREFERRED' &&
-    !advert &&
-    !videoShown;
+  // The case stays up whenever something is loaded in the player and the full
+  // now-playing page is not open, whatever YouTube Music does with its own
+  // small player in the meantime (page changes, videos, adverts, closing it).
+  const wanted = options.case3d && hasTrack() && !/PLAYER_PAGE_OPEN|FULLSCREEN|INACTIVE/.test(state);
 
   if (!wanted) {
     if (spin.el && !spin.el.hidden) spin.el.hidden = true;
@@ -303,31 +303,44 @@ function syncCase() {
 
   const host = spin.el || buildCase();
   if (!host.isConnected) document.body.append(host);
-  const src = currentArt();
-  for (const img of host.querySelectorAll('img')) {
-    if (src && img.src !== src) img.src = src;
-  }
-  const title = document.querySelector('ytmusic-player-bar .title');
-  const byline = document.querySelector('ytmusic-player-bar .byline');
-  const titleText = title ? title.textContent.trim() : '';
-  const bylineText = byline ? byline.textContent.trim() : '';
-  const b = host.querySelector('.back b');
-  const span = host.querySelector('.back span');
-  if (b.textContent !== titleText) b.textContent = titleText;
-  if (span.textContent !== bylineText) span.textContent = bylineText;
 
-  // Sit exactly where the page puts its small player, so the case follows it
-  // when the window or the Colors panel changes the space available.
-  const spot = player.getBoundingClientRect();
-  if (spot.width > 40 && spot.height > 40) {
-    const size = 200;
-    const left = Math.round(Math.max(8, Math.min(innerWidth - size - 8, spot.left + spot.width / 2 - size / 2)));
-    const top = Math.round(Math.max(72, Math.min(innerHeight - size - 8, spot.top + spot.height / 2 - size / 2)));
-    if (host.style.left !== `${left}px`) host.style.left = `${left}px`;
-    if (host.style.top !== `${top}px`) host.style.top = `${top}px`;
-    host.style.right = 'auto';
-    host.style.bottom = 'auto';
+  // During an advert the case keeps showing the song's own artwork and title.
+  if (!advert) {
+    const src = currentArt();
+    for (const img of host.querySelectorAll('img')) {
+      if (src && img.src !== src) img.src = src;
+    }
+    const title = document.querySelector('ytmusic-player-bar .title');
+    const byline = document.querySelector('ytmusic-player-bar .byline');
+    const titleText = title ? title.textContent.trim() : '';
+    const bylineText = byline ? byline.textContent.trim() : '';
+    const b = host.querySelector('.back b');
+    const span = host.querySelector('.back span');
+    if (titleText && b.textContent !== titleText) b.textContent = titleText;
+    if (bylineText && span.textContent !== bylineText) span.textContent = bylineText;
   }
+
+  // Sit where the page puts its small player when it shows one (so the case
+  // follows it when the window or the Colors panel changes the space);
+  // otherwise keep to the bottom-right corner above the player bar.
+  const size = 200;
+  const spot = player && state === 'MINIPLAYER' ? player.getBoundingClientRect() : null;
+  let left;
+  let top;
+  if (spot && spot.width > 40 && spot.height > 40) {
+    left = spot.left + spot.width / 2 - size / 2;
+    top = spot.top + spot.height / 2 - size / 2;
+  } else {
+    left = innerWidth - size - 28;
+    top = innerHeight - 88 - size - 22;
+  }
+  left = Math.round(Math.max(8, Math.min(innerWidth - size - 8, left)));
+  top = Math.round(Math.max(72, Math.min(innerHeight - size - 8, top)));
+  if (host.style.left !== `${left}px`) host.style.left = `${left}px`;
+  if (host.style.top !== `${top}px`) host.style.top = `${top}px`;
+  host.style.right = 'auto';
+  host.style.bottom = 'auto';
+
   if (host.hidden) host.hidden = false;
   root.setAttribute('ytmd-case-on', '');
   if (!spin.frame) {
