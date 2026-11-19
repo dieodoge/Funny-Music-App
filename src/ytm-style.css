@@ -1,0 +1,1022 @@
+/*
+ * Restyles the YouTube Music page: colors come from the --app-* variables
+ * (set from the Colors panel), and the layout is arranged as rounded panels:
+ * sidebar on the left, main content beside it, player bar along the bottom
+ * with track info left, playback controls + seek bar centered, volume right.
+ */
+
+/* Fallbacks, replaced at once by the saved colors. */
+:root {
+  --app-accent: #8b7cf6;
+  --app-bg: #14141b;
+  --app-panel: #14141b;
+  --app-text: #f2f2f7;
+  --app-base: #0a0a0e;
+  --app-surface: #23232b;
+  --app-surface2: #33333b;
+  --app-border: #2e2e36;
+  --app-muted: #9d9da6;
+  --app-on-accent: #0b0b0f;
+  --app-accent-soft: #2e2b4b;
+  --app-gap: 8px;
+  --app-radius: 12px;
+  --app-bar-h: 88px;
+}
+
+/* ---------- color mapping ---------- */
+
+html:root {
+  --ytmusic-background: var(--app-panel) !important;
+  --ytmusic-general-background-a: var(--app-panel) !important;
+  --ytmusic-general-background-c: var(--app-panel) !important;
+  --ytmusic-color-black1: var(--app-surface) !important;
+  --ytmusic-color-black2: var(--app-panel) !important;
+  --ytmusic-color-black4: var(--app-panel) !important;
+  --ytmusic-brand-background-solid: var(--app-surface) !important;
+  --ytmusic-nav-bar: var(--app-base) !important;
+  --ytmusic-player-bar-background: var(--app-base) !important;
+  --ytmusic-player-page-background: var(--app-panel) !important;
+  --ytmusic-detail-header: var(--app-panel) !important;
+  --ytmusic-dropdown-background: var(--app-surface) !important;
+  --ytmusic-dialog-background-color: var(--app-surface) !important;
+  --ytmusic-menu-popup-background: var(--app-surface) !important;
+  --ytmusic-footer-background: var(--app-panel) !important;
+  --ytmusic-search-background: var(--app-surface) !important;
+  --ytmusic-search-border: var(--app-border) !important;
+  --ytmusic-horizontal-action-card-background: var(--app-surface) !important;
+  --ytmusic-alert-with-actions-background: var(--app-surface) !important;
+  --ytmusic-multiselect-form-footer-background: var(--app-surface) !important;
+  --ytmusic-opalescence-dark-grey: var(--app-border) !important;
+
+  --ytmusic-text-primary: var(--app-text) !important;
+  --ytmusic-color-white1: var(--app-text) !important;
+  --ytmusic-text-secondary: var(--app-muted) !important;
+  --ytmusic-color-grey2: var(--app-muted) !important;
+  --ytmusic-color-grey3: var(--app-muted) !important;
+  --ytmusic-icon-inactive: var(--app-muted) !important;
+  --ytmusic-wordmark-text: var(--app-text) !important;
+  --ytmusic-alert-with-actions-header-text: var(--app-text) !important;
+  --ytmusic-text-disabled: color-mix(in srgb, var(--app-text) 40%, transparent) !important;
+  --ytmusic-icon-disabled: color-mix(in srgb, var(--app-text) 40%, transparent) !important;
+  --ytmusic-color-grey4: color-mix(in srgb, var(--app-text) 45%, var(--app-bg)) !important;
+  --ytmusic-color-grey5: color-mix(in srgb, var(--app-text) 38%, var(--app-bg)) !important;
+  --ytmusic-player-bar-ink-color: var(--app-text) !important;
+  --ytmusic-guide-signin-promo-text-secondary: var(--app-muted) !important;
+  --ytmusic-search-box-text-secondary: var(--app-muted) !important;
+  --ytmusic-search-suggestion-text-secondary: var(--app-muted) !important;
+  --ytmusic-search-suggestion-icon-color: var(--app-muted) !important;
+  --ytmusic-message-renderer-icon-color: var(--app-muted) !important;
+  --ytmusic-message-renderer-text-color: var(--app-muted) !important;
+  --ytmusic-inline-badge-color: var(--app-muted) !important;
+  --ytmusic-color-badge: var(--app-muted) !important;
+  --ytmusic-color-close-button: var(--app-muted) !important;
+  --ytmusic-two-column-browse-results-description-color: var(--app-muted) !important;
+  --ytmusic-call-to-action-disclaimer: var(--app-muted) !important;
+  --ytmusic-player-bar-disabled-secondary-color: var(--app-muted) !important;
+
+  --ytmusic-color-white1-alpha10: color-mix(in srgb, var(--app-text) 10%, transparent) !important;
+  --ytmusic-color-white1-alpha15: color-mix(in srgb, var(--app-text) 15%, transparent) !important;
+  --ytmusic-color-white1-alpha20: color-mix(in srgb, var(--app-text) 20%, transparent) !important;
+  --ytmusic-color-white1-alpha25: color-mix(in srgb, var(--app-text) 25%, transparent) !important;
+  --ytmusic-color-white1-alpha30: color-mix(in srgb, var(--app-text) 30%, transparent) !important;
+  --ytmusic-color-white1-alpha50: color-mix(in srgb, var(--app-text) 50%, transparent) !important;
+  --ytmusic-color-white1-alpha70: color-mix(in srgb, var(--app-text) 70%, transparent) !important;
+  --ytmusic-color-white1-alpha95: color-mix(in srgb, var(--app-text) 95%, transparent) !important;
+  --ytmusic-color-white-opacity-0-05: color-mix(in srgb, var(--app-text) 5%, transparent) !important;
+  --ytmusic-color-white-opacity-0-5: color-mix(in srgb, var(--app-text) 50%, transparent) !important;
+  --ytmusic-divider: var(--app-border) !important;
+  --ytmusic-guide-divider: var(--app-border) !important;
+  --ytmusic-color-input-border: var(--app-border) !important;
+  --ytmusic-dropdown-border-color: var(--app-border) !important;
+  --ytmusic-confirm-dialog-outline: var(--app-border) !important;
+  --ytmusic-search-bar-border-bauhaus: var(--app-border) !important;
+  --ytmusic-navigation-button-outline-color: var(--app-border) !important;
+  --ytmusic-toggle-button-chip-border-color: var(--app-border) !important;
+  --ytmusic-shelf-bottom-button-border-color: var(--app-border) !important;
+  --ytmusic-immersive-carousel-button-border: var(--app-border) !important;
+  --ytmusic-multiselect-form-item-border-color: var(--app-border) !important;
+  --ytmusic-outline-button-border-color: color-mix(in srgb, var(--app-text) 30%, transparent) !important;
+  --ytmusic-guide-entry-focus-border: var(--app-border) !important;
+  --ytmusic-progress-container: color-mix(in srgb, var(--app-text) 20%, transparent) !important;
+  --ytmusic-player-bar-container-color: color-mix(in srgb, var(--app-text) 22%, transparent) !important;
+  --ytmusic-guide-hover: var(--app-surface) !important;
+  --ytmusic-badge-chip-background: var(--app-surface) !important;
+  --ytmusic-badge-chip-inactive-hover: var(--app-surface2) !important;
+  --ytmusic-explore-chip-background: var(--app-surface) !important;
+  --ytmusic-search-bar-background-bauhaus: var(--app-surface) !important;
+  --ytmusic-ten-percent-layer: var(--app-surface) !important;
+  --ytmusic-overlay-button-secondary: var(--app-surface) !important;
+  --ytmusic-dropdown-item-hover-background: var(--app-surface2) !important;
+  --ytmusic-search-suggestion-focus-active-background: var(--app-surface2) !important;
+  --ytmusic-menu-renderer-button-hover-background: var(--app-surface) !important;
+  --ytmusic-menu-item-focus-background-color: var(--app-surface2) !important;
+  --ytmusic-responsive-list-item-checked-background-bauhaus: var(--app-surface) !important;
+  --ytmusic-multiselect-form-item-hover-background-color: var(--app-surface2) !important;
+  --ytmusic-multiselect-form-item-focus-background-color: var(--app-surface) !important;
+
+  --ytmusic-text-primary-inverse: var(--app-bg) !important;
+  --ytmusic-inverted-background: var(--app-text) !important;
+  --ytmusic-toggle-button-chip-active-background: var(--app-text) !important;
+  --ytmusic-play-pause-button-background: var(--app-text) !important;
+  --ytmusic-responsive-header-primary-button-background: var(--app-accent) !important;
+
+  --ytmusic-playback-progress-color: var(--app-accent) !important;
+  --ytmusic-call-to-action: var(--app-accent) !important;
+  --ytmusic-color-lightblue: var(--app-accent) !important;
+  --ytmusic-themed-blue: var(--app-accent) !important;
+  --ytmusic-focus-active: var(--app-accent) !important;
+  --ytmusic-search-suggestion-focus-active: var(--app-accent) !important;
+  --ytmusic-setting-item-toggle-active: var(--app-accent) !important;
+  --ytmusic-brand-link-text: var(--app-accent) !important;
+  --ytmusic-color-blue-1: var(--app-accent) !important;
+
+  --yt-spec-base-background: var(--app-panel) !important;
+  --yt-spec-raised-background: var(--app-surface) !important;
+  --yt-spec-menu-background: var(--app-surface) !important;
+  --yt-spec-general-background-a: var(--app-panel) !important;
+  --yt-spec-general-background-b: var(--app-panel) !important;
+  --yt-spec-general-background-c: var(--app-panel) !important;
+  --yt-spec-brand-background-solid: var(--app-surface) !important;
+  --yt-spec-brand-background-primary: var(--app-surface) !important;
+  --yt-spec-text-primary: var(--app-text) !important;
+  --yt-spec-text-secondary: var(--app-muted) !important;
+  --yt-spec-text-disabled: color-mix(in srgb, var(--app-text) 40%, transparent) !important;
+  --yt-spec-text-primary-inverse: var(--app-bg) !important;
+  --yt-spec-inverted-background: var(--app-text) !important;
+  --yt-spec-icon-active-other: var(--app-text) !important;
+  --yt-spec-icon-inactive: var(--app-muted) !important;
+  --yt-spec-icon-disabled: color-mix(in srgb, var(--app-text) 40%, transparent) !important;
+  --yt-spec-call-to-action: var(--app-accent) !important;
+  --yt-spec-call-to-action-inverse: var(--app-accent) !important;
+  --yt-spec-themed-blue: var(--app-accent) !important;
+  --yt-spec-10-percent-layer: var(--app-border) !important;
+  --yt-spec-outline: var(--app-border) !important;
+  --yt-spec-badge-chip-background: var(--app-surface) !important;
+  --yt-spec-additive-background: var(--app-surface) !important;
+  --yt-spec-mono-tonal-hover: var(--app-surface2) !important;
+  --yt-spec-mono-filled-hover: color-mix(in srgb, var(--app-text) 85%, var(--app-bg)) !important;
+  --yt-spec-touch-response: var(--app-text) !important;
+
+  --paper-slider-active-color: var(--app-accent) !important;
+  --paper-slider-knob-color: var(--app-accent) !important;
+  --paper-slider-container-color: color-mix(in srgb, var(--app-text) 22%, transparent) !important;
+  --paper-progress-active-color: var(--app-accent) !important;
+  --paper-toggle-button-checked-bar-color: var(--app-accent) !important;
+  --paper-toggle-button-checked-button-color: var(--app-accent) !important;
+  --paper-spinner-color: var(--app-accent) !important;
+}
+
+html {
+  background: var(--app-base) !important;
+  color: var(--app-text);
+}
+
+/* The body must stay see-through or it paints over the panels behind it. */
+body {
+  background: transparent !important;
+}
+
+::selection {
+  background: var(--app-accent);
+  color: var(--app-on-accent);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--app-surface2);
+  border: 3px solid transparent;
+  border-radius: 8px;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--app-muted);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---------- panels ---------- */
+
+/* Rounded backdrops behind the sidebar and the main area. */
+ytmusic-app::before,
+ytmusic-app::after {
+  content: '';
+  position: fixed;
+  top: 64px;
+  bottom: calc(var(--app-bar-h) + var(--app-gap));
+  border-radius: var(--app-radius);
+  background: var(--app-panel);
+  z-index: -1;
+  pointer-events: none;
+}
+
+ytmusic-app::before {
+  left: var(--app-gap);
+  width: calc(240px - 2 * var(--app-gap));
+}
+
+ytmusic-app::after {
+  left: 240px;
+  right: 0;
+  /* A soft wash of the accent color at the top of the main panel. */
+  background: linear-gradient(color-mix(in srgb, var(--app-accent) 14%, var(--app-panel)), var(--app-panel) 340px);
+}
+
+/* The page's own full-width dark fade; the panel above replaces it. */
+ytmusic-browse-response .background-gradient {
+  background: none !important;
+}
+
+/* Nothing playing yet: no player bar, so the panels reach the bottom. */
+ytmusic-app:has(ytmusic-app-layout[player-ui-state='INACTIVE'])::before,
+ytmusic-app:has(ytmusic-app-layout[player-ui-state='INACTIVE'])::after {
+  bottom: var(--app-gap);
+}
+
+/* Sidebar collapsed to icons (the menu button in the top-left). */
+ytmusic-app:has(#guide:not([opened]))::before {
+  width: calc(72px - 2 * var(--app-gap));
+}
+
+ytmusic-app:has(#guide:not([opened]))::after {
+  left: 72px;
+}
+
+/* Some pages put a window-wide banner image behind everything, including the
+   sidebar. The main panel's own color wash replaces it. */
+ytmusic-browse-response #background.immersive-background {
+  display: none !important;
+}
+
+#nav-bar-background,
+#mini-guide-background,
+#guide-wrapper,
+#player-bar-background {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#nav-bar-background {
+  background: var(--app-base) !important;
+  opacity: 1 !important;
+  height: 64px !important;
+}
+
+ytmusic-nav-bar yt-icon-button,
+ytmusic-nav-bar yt-icon {
+  color: var(--app-text) !important;
+}
+
+/* Filter chips ("Relax", "Workout", ...) */
+ytmusic-chip-cloud-chip-renderer a {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border-color: transparent !important;
+}
+
+ytmusic-chip-cloud-chip-renderer a:hover {
+  background: var(--app-surface2) !important;
+}
+
+ytmusic-chip-cloud-chip-renderer[is-selected] a,
+ytmusic-chip-cloud-chip-renderer[chip-style='STYLE_PRIMARY'] a {
+  background: var(--app-text) !important;
+  color: var(--app-bg) !important;
+}
+
+ytmusic-chip-cloud-chip-renderer a yt-formatted-string {
+  color: inherit !important;
+}
+
+#nav-bar-divider {
+  display: none !important;
+}
+
+ytmusic-nav-bar {
+  background: transparent !important;
+}
+
+ytmusic-guide-renderer {
+  background: transparent !important;
+}
+
+ytmusic-guide-entry-renderer[active] tp-yt-paper-item {
+  background: var(--app-accent-soft) !important;
+}
+
+ytmusic-guide-entry-renderer[active] .title,
+ytmusic-guide-entry-renderer[active] yt-icon {
+  color: var(--app-accent) !important;
+  fill: var(--app-accent) !important;
+}
+
+ytmusic-search-box .search-box,
+ytmusic-search-box[opened] .search-container {
+  border-radius: 999px !important;
+}
+
+/* ---------- player bar ---------- */
+
+html:root {
+  --ytmusic-player-bar-height: var(--app-bar-h) !important;
+}
+
+#player-bar-background {
+  background: var(--app-base) !important;
+}
+
+ytmusic-player-bar {
+  height: var(--app-bar-h) !important;
+  background: var(--app-base) !important;
+  grid-template-areas: 'middle start end' !important;
+  grid-template-columns: minmax(0, 34fr) minmax(0, 32fr) minmax(0, 34fr) !important;
+  color: var(--app-muted);
+}
+
+/* Track art, title, artist: left. */
+ytmusic-player-bar .middle-controls {
+  justify-content: flex-start !important;
+  padding-left: 16px;
+  min-width: 0;
+}
+
+ytmusic-player-bar .thumbnail-image-wrapper .image {
+  border-radius: 6px !important;
+}
+
+ytmusic-player-bar .content-info-wrapper {
+  min-width: 64px;
+  flex: 0 1 auto !important;
+  max-width: none !important;
+}
+
+ytmusic-player-bar .title {
+  color: var(--app-text) !important;
+}
+
+ytmusic-player-bar .byline,
+ytmusic-player-bar .byline a,
+ytmusic-player-bar .time-info {
+  color: var(--app-muted) !important;
+}
+
+/* Previous / play / next: centered, with the seek bar underneath. */
+ytmusic-player-bar #left-controls {
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding-top: 5px;
+  box-sizing: border-box;
+  position: relative;
+  width: auto !important;
+  flex: none !important;
+}
+
+ytmusic-player-bar .left-controls-buttons {
+  height: 40px !important;
+  align-items: center !important;
+  flex: none !important;
+}
+
+ytmusic-player-bar #play-pause-button {
+  --iron-icon-width: 22px !important;
+  --iron-icon-height: 22px !important;
+  width: 38px !important;
+  height: 38px !important;
+  padding: 8px !important;
+  box-sizing: border-box !important;
+  border-radius: 50%;
+  background: var(--app-accent) !important;
+  color: var(--app-on-accent) !important;
+  --yt-icon-button-icon-color: var(--app-on-accent);
+  margin: 0 10px !important;
+  transition: transform 0.12s;
+}
+
+ytmusic-player-bar #play-pause-button:hover {
+  transform: scale(1.06);
+}
+
+ytmusic-player-bar #play-pause-button yt-icon {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+ytmusic-player-bar #play-pause-button yt-icon,
+ytmusic-player-bar #play-pause-button svg {
+  color: var(--app-on-accent) !important;
+  fill: var(--app-on-accent) !important;
+}
+
+ytmusic-player-bar .previous-button,
+ytmusic-player-bar .next-button,
+ytmusic-player-bar .right-controls-buttons yt-icon-button,
+ytmusic-player-bar .toggle-player-page-button {
+  color: var(--app-muted) !important;
+}
+
+ytmusic-player-bar .previous-button:hover,
+ytmusic-player-bar .next-button:hover,
+ytmusic-player-bar .right-controls-buttons yt-icon-button:hover,
+ytmusic-player-bar .toggle-player-page-button:hover {
+  color: var(--app-text) !important;
+}
+
+ytmusic-player-bar .time-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  margin: 0 !important;
+  display: flex;
+  justify-content: center;
+  font-size: 11px !important;
+  pointer-events: none;
+}
+
+ytmusic-player-bar #progress-bar {
+  left: 34% !important;
+  width: 32% !important;
+  top: 42px !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  transform: none !important;
+  --paper-slider-height: 4px;
+}
+
+ytmusic-player-bar #progress-bar #primaryProgress,
+ytmusic-player-bar #volume-slider #primaryProgress,
+ytmusic-player-bar #expand-volume-slider #primaryProgress {
+  background: var(--app-accent) !important;
+}
+
+ytmusic-player-bar #progress-bar .slider-knob-inner,
+ytmusic-player-bar #volume-slider .slider-knob-inner,
+ytmusic-player-bar #expand-volume-slider .slider-knob-inner {
+  background: var(--app-accent) !important;
+  border-color: var(--app-accent) !important;
+}
+
+ytmusic-player-bar #progress-bar #sliderBar,
+ytmusic-player-bar #progress-bar #progressContainer {
+  border-radius: 4px;
+}
+
+/* Volume and extras: right. */
+ytmusic-player-bar #right-controls {
+  justify-content: flex-end !important;
+  padding-right: 8px;
+}
+
+/* ---------- "View full album" button (added by this app) ---------- */
+
+#ytmd-album-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  margin: 0 6px 0 10px;
+  padding: 0 12px 0 9px;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--app-text);
+  font: 500 12px/1 Roboto, 'Segoe UI', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+#ytmd-album-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+#ytmd-album-button:hover:not(:disabled) {
+  background: var(--app-accent-soft);
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+#ytmd-album-button:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+#ytmd-album-button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+/* ---------- now-playing page ---------- */
+
+ytmusic-player-page {
+  background: var(--app-panel) !important;
+  border-radius: var(--app-radius);
+}
+
+/* ---------- buttons drawn by the page that ignore its color variables ---------- */
+
+.ytSpecButtonShapeNextMono.ytSpecButtonShapeNextTonal {
+  background: var(--app-surface2) !important;
+  color: var(--app-text) !important;
+}
+
+.ytSpecButtonShapeNextMono.ytSpecButtonShapeNextFilled {
+  background: var(--app-text) !important;
+  color: var(--app-bg) !important;
+}
+
+.ytSpecButtonShapeNextMono.ytSpecButtonShapeNextOutline {
+  border-color: color-mix(in srgb, var(--app-text) 30%, transparent) !important;
+  color: var(--app-text) !important;
+}
+
+.ytSpecButtonShapeNextMono.ytSpecButtonShapeNextText {
+  color: var(--app-text) !important;
+}
+
+.ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextFilled {
+  background: var(--app-accent) !important;
+  color: var(--app-on-accent) !important;
+}
+
+.ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextText,
+.ytSpecButtonShapeNextCallToAction.ytSpecButtonShapeNextOutline {
+  color: var(--app-accent) !important;
+}
+
+/* ---------- mini album art (bottom right while browsing) ---------- */
+
+@keyframes ytmd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ytmd-pop {
+  from {
+    transform: scale(0.4) rotate(-200deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* For songs (not music videos) the popup becomes a round disc that spins in
+   when it appears and keeps turning slowly while music plays. */
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] {
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 3px var(--app-accent) !important;
+  animation: ytmd-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
+  animation: ytmd-spin 16s linear infinite;
+  animation-play-state: paused;
+}
+
+html[ytmd-playing]:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] #song-image {
+  animation-play-state: running;
+}
+
+/* The little hole in the middle of the disc. */
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  background: var(--app-base);
+  box-shadow: 0 0 0 3px var(--app-accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+html:not([ytmd-ad]):not([ytmd-case-on]) ytmusic-player[player-ui-state='MINIPLAYER'][playback-mode='ATV_PREFERRED'] .top-row-buttons {
+  justify-content: center !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ytmusic-player[player-ui-state='MINIPLAYER'],
+  ytmusic-player[player-ui-state='MINIPLAYER'] #song-image {
+    animation: none !important;
+  }
+}
+
+/* ---------- video missing: show the album art instead ---------- */
+
+ytmusic-player[ytmd-no-video] #song-video .html5-video-player {
+  background: var(--ytmd-art) center / contain no-repeat !important;
+}
+
+ytmusic-player[ytmd-no-video] #song-video video {
+  opacity: 0 !important;
+}
+
+/* ---------- 3D CD case (optional replacement for the spinning disc) ---------- */
+
+/* While the case is showing, the page's own mini picture is hidden. */
+html[ytmd-case-on] ytmusic-player[player-ui-state='MINIPLAYER'] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#ytmd-case {
+  position: fixed;
+  right: 40px;
+  bottom: calc(var(--app-bar-h) + 26px);
+  width: 200px;
+  height: 200px;
+  perspective: 760px;
+  z-index: 2147483000;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  animation: ytmd-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+#ytmd-case[hidden] {
+  display: none;
+}
+
+#ytmd-case.dragging {
+  cursor: grabbing;
+}
+
+#ytmd-case .box {
+  position: absolute;
+  left: 12px;
+  top: 22px;
+  width: 176px;
+  height: 156px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+#ytmd-case .face {
+  position: absolute;
+  box-sizing: border-box;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background: #101014;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+#ytmd-case .front,
+#ytmd-case .back {
+  inset: 0;
+  border-radius: 4px;
+}
+
+#ytmd-case .front {
+  transform: translateZ(7px);
+  display: flex;
+}
+
+#ytmd-case .back {
+  transform: rotateY(180deg) translateZ(7px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  color: #fff;
+  font: 500 12px/1.3 Roboto, 'Segoe UI', sans-serif;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* The ridged plastic strip down the left of a CD case. */
+#ytmd-case .hinge {
+  flex: none;
+  width: 20px;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.16) 0 2px, rgba(0, 0, 0, 0.35) 2px 5px), #1b1b21;
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#ytmd-case .front img {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+#ytmd-case .back img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(6px) brightness(0.45);
+  transform: scale(1.15);
+  pointer-events: none;
+}
+
+#ytmd-case .back b,
+#ytmd-case .back span {
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#ytmd-case .back b {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Shine across the clear plastic. */
+#ytmd-case .front::after,
+#ytmd-case .back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.05) 30%, transparent 46%, transparent 72%, rgba(255, 255, 255, 0.12));
+  pointer-events: none;
+}
+
+#ytmd-case .side {
+  background: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08)), #2a2a33;
+}
+
+#ytmd-case .left,
+#ytmd-case .right {
+  width: 14px;
+  height: 156px;
+  left: 81px;
+  top: 0;
+}
+
+#ytmd-case .left {
+  transform: rotateY(-90deg) translateZ(88px);
+}
+
+#ytmd-case .right {
+  transform: rotateY(90deg) translateZ(88px);
+}
+
+#ytmd-case .top,
+#ytmd-case .bottom {
+  width: 176px;
+  height: 14px;
+  left: 0;
+  top: 71px;
+}
+
+#ytmd-case .top {
+  transform: rotateX(90deg) translateZ(78px);
+}
+
+#ytmd-case .bottom {
+  transform: rotateX(-90deg) translateZ(78px);
+}
+
+#ytmd-case .shadow {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  bottom: 4px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(rgba(0, 0, 0, 0.5), transparent 70%);
+  pointer-events: none;
+}
+
+/* ---------- keeping the player bar tidy at every window width ---------- */
+
+/* Fixed proportions: track info | controls + seek bar | volume and extras.
+   The seek bar is placed with the same numbers so it always sits under the
+   buttons, and nothing in one column can push into the next. */
+ytmusic-player-bar {
+  --ytmd-left: 30%;
+  --ytmd-mid: 40%;
+  grid-template-columns: var(--ytmd-left) var(--ytmd-mid) minmax(0, 1fr) !important;
+}
+
+ytmusic-player-bar #progress-bar {
+  left: calc(var(--ytmd-left) + 12px) !important;
+  width: calc(var(--ytmd-mid) - 24px) !important;
+}
+
+ytmusic-player-bar .middle-controls,
+ytmusic-player-bar #left-controls,
+ytmusic-player-bar #right-controls {
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+ytmusic-player-bar .middle-controls {
+  padding-left: 14px;
+  gap: 2px;
+}
+
+ytmusic-player-bar .thumbnail-image-wrapper,
+ytmusic-player-bar .middle-controls-buttons,
+#ytmd-album-button {
+  flex: none !important;
+}
+
+/* The title and artist take whatever room is left and cut off neatly. */
+ytmusic-player-bar .content-info-wrapper {
+  flex: 1 1 auto !important;
+  min-width: 48px !important;
+  overflow: hidden;
+}
+
+ytmusic-player-bar .content-info-wrapper .title,
+ytmusic-player-bar .content-info-wrapper .byline {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+ytmusic-player-bar #right-controls {
+  justify-content: flex-end !important;
+  gap: 2px;
+}
+
+/* Medium windows: the like / dislike / menu buttons are on the now-playing
+   page anyway, so they make way for the title here. */
+@media (max-width: 1320px) {
+  ytmusic-player-bar .middle-controls-buttons {
+    display: none !important;
+  }
+}
+
+/* Small windows: the album button keeps its icon and drops the word, and the
+   controls column gets a little more of the width. */
+@media (max-width: 900px) {
+  ytmusic-player-bar {
+    --ytmd-left: 32%;
+    --ytmd-mid: 42%;
+  }
+
+  #ytmd-album-button {
+    padding: 0 7px;
+    margin: 0 4px;
+  }
+
+  #ytmd-album-button span {
+    display: none;
+  }
+
+  ytmusic-player-bar .time-info {
+    font-size: 10px !important;
+  }
+}
+
+/* Very small windows: the art thumbnail goes, the title keeps its room. */
+@media (max-width: 600px) {
+  ytmusic-player-bar .thumbnail-image-wrapper {
+    display: none !important;
+  }
+
+  ytmusic-player-bar .middle-controls {
+    padding-left: 10px;
+  }
+}
+
+ytmusic-nav-bar .center-content {
+  margin-right: 12px;
+}
+
+/* ---------- sidebar: keep its list and scrollbar inside the panel ---------- */
+
+ytmusic-app {
+  --ytmd-bottom: var(--app-bar-h);
+}
+
+ytmusic-app:has(ytmusic-app-layout[player-ui-state='INACTIVE']) {
+  --ytmd-bottom: 0px;
+}
+
+/* No arrow buttons on any scrollbar; just the slim rounded thumb. */
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* The sidebar's content stops at the panel's inner edges, so its scrollbar
+   sits inside the panel instead of on top of the border. */
+#guide[opened] ytmusic-guide-renderer {
+  box-sizing: border-box !important;
+  width: calc(240px - var(--app-gap)) !important;
+  height: calc(100vh - 64px - var(--ytmd-bottom) - var(--app-gap) - 6px) !important;
+  padding-right: 4px !important;
+  overflow: hidden !important;
+}
+
+ytmusic-guide-renderer ::-webkit-scrollbar {
+  width: 8px;
+}
+
+ytmusic-guide-renderer ::-webkit-scrollbar-thumb {
+  border-width: 2px;
+}
+
+ytmusic-guide-renderer #sections,
+ytmusic-guide-renderer #items {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-surface2) transparent;
+}
+
+/* ---------- synced lyrics (Lyrics tab) ---------- */
+
+ytmusic-tab-renderer[ytmd-synced] {
+  overflow: hidden !important;
+}
+
+/* YouTube Music's own block of lyrics steps aside while the synced ones show. */
+ytmusic-tab-renderer[ytmd-synced] > :not(#ytmd-lyrics) {
+  display: none !important;
+}
+
+#ytmd-lyrics {
+  position: relative;
+  height: 100%;
+  min-height: 240px;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Lines fade in at the top and out at the bottom. */
+#ytmd-lyrics .viewport {
+  position: absolute;
+  inset: 0 0 24px 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 16%, #000 80%, transparent);
+  mask-image: linear-gradient(transparent, #000 16%, #000 80%, transparent);
+}
+
+#ytmd-lyrics .lines {
+  padding: 0 14px 0 6px;
+  transition: transform 0.55s cubic-bezier(0.22, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+#ytmd-lyrics .line {
+  margin: 0 0 16px;
+  font: 700 22px/1.32 'YouTube Sans', 'Segoe UI Variable Display', 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--app-text) 34%, transparent);
+  cursor: pointer;
+  transform-origin: left center;
+  transition: color 0.35s ease, transform 0.35s ease, opacity 0.35s ease, text-shadow 0.35s ease;
+  text-shadow: none !important;
+}
+
+#ytmd-lyrics .line.past {
+  color: color-mix(in srgb, var(--app-text) 52%, transparent);
+}
+
+/* The line being sung: accent colour with a soft glow of the same colour. */
+#ytmd-lyrics .line.now {
+  color: var(--app-accent);
+  transform: scale(1.045);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--app-accent) 40%, transparent) !important;
+}
+
+#ytmd-lyrics .line.pause {
+  font-size: 18px;
+  letter-spacing: 0.3em;
+}
+
+#ytmd-lyrics .line:hover {
+  color: var(--app-text);
+}
+
+#ytmd-lyrics .line.now:hover {
+  color: var(--app-accent);
+}
+
+#ytmd-lyrics .credit {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  font: 500 11px/1 Roboto, 'Segoe UI', sans-serif;
+  color: var(--app-muted);
+  opacity: 0.8;
+}

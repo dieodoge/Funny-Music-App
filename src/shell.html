@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'" />
+    <title>YTM Desktop</title>
+    <link rel="stylesheet" href="shell.css" />
+  </head>
+  <body>
+    <header id="titlebar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="6" class="logo-bg" />
+          <rect x="5.7" y="12" width="2.3" height="5.6" rx="1.15" class="logo-fg" />
+          <rect x="9.1" y="9.2" width="2.3" height="8.4" rx="1.15" class="logo-fg" />
+          <rect x="12.6" y="6.4" width="2.3" height="11.2" rx="1.15" class="logo-fg" />
+          <rect x="16" y="10.6" width="2.3" height="7" rx="1.15" class="logo-fg" />
+        </svg>
+        <span class="name">YTM Desktop</span>
+      </div>
+
+      <div class="nav">
+        <button id="btn-back" class="tb-btn" title="Back" aria-label="Back" disabled>
+          <svg viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6" /></svg>
+        </button>
+        <button id="btn-forward" class="tb-btn" title="Forward" aria-label="Forward" disabled>
+          <svg viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6" /></svg>
+        </button>
+        <button id="btn-reload" class="tb-btn" title="Reload" aria-label="Reload">
+          <svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.3-5.2M19 4.5V9h-4.5" /></svg>
+        </button>
+        <button id="btn-home" class="tb-btn" title="Home" aria-label="Home">
+          <svg viewBox="0 0 24 24"><path d="M4.5 11L12 4.5l7.5 6.5V19a1 1 0 0 1-1 1h-4v-5.5h-5V20h-4a1 1 0 0 1-1-1z" /></svg>
+        </button>
+      </div>
+
+      <div id="page-title" class="drag-fill"></div>
+
+      <div class="actions">
+        <button id="btn-settings" class="tb-btn" title="Colors" aria-label="Color settings" aria-expanded="false">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4L18 18M18 6l-1.6 1.6M7.6 16.4L6 18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="window-controls">
+        <button id="btn-min" class="wc-btn" title="Minimize" aria-label="Minimize">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8" /></svg>
+        </button>
+        <button id="btn-max" class="wc-btn" title="Maximize" aria-label="Maximize">
+          <svg class="icon-max" viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" rx="1" /></svg>
+          <svg class="icon-restore" viewBox="0 0 12 12">
+            <rect x="2" y="3.8" width="6.2" height="6.2" rx="1" />
+            <path d="M4 3.8V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-.8" />
+          </svg>
+        </button>
+        <button id="btn-close" class="wc-btn close" title="Close" aria-label="Close">
+          <svg viewBox="0 0 12 12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <aside id="drawer" aria-label="Color settings" hidden>
+      <div class="drawer-head">
+        <h2>Colors</h2>
+        <button id="btn-drawer-close" class="tb-btn" title="Close" aria-label="Close settings">
+          <svg viewBox="0 0 12 12"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" /></svg>
+        </button>
+      </div>
+
+      <section>
+        <h3>Presets</h3>
+        <div id="presets" class="presets"></div>
+      </section>
+
+      <section>
+        <h3>Custom</h3>
+        <label class="color-row">
+          <span><b>Accent</b><small>Buttons, progress, highlights</small></span>
+          <code id="hex-accent"></code>
+          <input id="color-accent" type="color" data-key="accent" />
+        </label>
+        <label class="color-row">
+          <span><b>Background</b><small>Panels and the window</small></span>
+          <code id="hex-background"></code>
+          <input id="color-background" type="color" data-key="background" />
+        </label>
+        <label class="color-row">
+          <span><b>Text</b><small>Titles and labels</small></span>
+          <code id="hex-text"></code>
+          <input id="color-text" type="color" data-key="text" />
+        </label>
+      </section>
+
+      <button id="btn-reset" class="reset">Reset to default</button>
+      <p class="hint">Changes apply right away and are remembered next time you open the app.</p>
+
+      <section>
+        <h3>Style</h3>
+        <label class="color-row">
+          <span><b>Glass background</b><small>Glossy and see-through, with your desktop blurred behind</small></span>
+          <input id="toggle-glass" type="checkbox" role="switch" />
+        </label>
+        <label class="color-row switch-row">
+          <span><b>3D album case</b><small>The mini album art becomes a CD case you can drag to turn</small></span>
+          <input id="toggle-case3d" type="checkbox" role="switch" />
+        </label>
+      </section>
+    </aside>
+
+    <script src="shell.js"></script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "ytm-desktop",
+  "productName": "YTM Desktop",
+  "version": "1.5.1",
+  "description": "Personal desktop window for YouTube Music with a custom layout and colors",
+  "main": "src/main.js",
+  "author": "dieodoge",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/run.js",
+    "build": "electron-builder --win dir nsis"
+  },
+  "build": {
+    "appId": "local.dieodoge.ytmdesktop",
+    "productName": "YTM Desktop",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "dir",
+        "nsis"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
+    "playwright-core": "^1.65.1"
+  }
+}

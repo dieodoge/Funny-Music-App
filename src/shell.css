@@ -1,0 +1,477 @@
+:root {
+  --app-accent: #8b7cf6;
+  --app-bg: #14141b;
+  --app-text: #f2f2f7;
+  --app-base: #0a0a0e;
+  --app-surface: #23232b;
+  --app-surface2: #33333b;
+  --app-border: #2e2e36;
+  --app-muted: #9d9da6;
+  --app-on-accent: #0b0b0f;
+  --app-accent-soft: #2e2b4b;
+  --titlebar-h: 44px;
+  --drawer-w: 340px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--app-base);
+  color: var(--app-text);
+  font: 13px/1.4 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- title bar ---------- */
+
+#titlebar {
+  height: var(--titlebar-h);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 14px;
+  background: var(--app-base);
+  -webkit-app-region: drag;
+}
+
+#titlebar button {
+  -webkit-app-region: no-drag;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: 10px;
+}
+
+.logo {
+  width: 20px;
+  height: 20px;
+  stroke: none;
+}
+
+.logo-bg {
+  fill: var(--app-accent);
+}
+
+.logo-fg {
+  fill: var(--app-on-accent);
+}
+
+.name {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.nav,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.drag-fill {
+  flex: 1;
+  min-width: 40px;
+  padding: 0 12px;
+  text-align: center;
+  color: var(--app-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tb-btn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.tb-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tb-btn:hover:not(:disabled) {
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+
+.tb-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tb-btn[aria-expanded='true'] {
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+}
+
+.window-controls {
+  display: flex;
+  height: 100%;
+  margin-left: 6px;
+}
+
+.wc-btn {
+  width: 46px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.wc-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.1;
+}
+
+.wc-btn:hover {
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+
+.wc-btn.close:hover {
+  background: #d93a3a;
+  color: #fff;
+}
+
+.icon-restore,
+body.maximized .icon-max {
+  display: none;
+}
+
+body.maximized .icon-restore {
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: -2px;
+}
+
+/* ---------- settings drawer ---------- */
+
+#drawer {
+  position: fixed;
+  top: var(--titlebar-h);
+  right: 0;
+  bottom: 0;
+  width: var(--drawer-w);
+  padding: 4px 8px 8px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+#drawer[hidden] {
+  display: none;
+}
+
+#drawer::before {
+  content: '';
+  position: fixed;
+  top: var(--titlebar-h);
+  right: 8px;
+  bottom: 8px;
+  width: calc(var(--drawer-w) - 8px);
+  border-radius: 12px;
+  background: var(--app-bg);
+  z-index: -1;
+}
+
+#drawer > * {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+}
+
+.drawer-head .tb-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+h3 {
+  margin: 22px 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.preset {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.preset:hover {
+  background: var(--app-surface);
+}
+
+.preset.active {
+  border-color: var(--app-accent);
+  box-shadow: inset 0 0 0 1px var(--app-accent);
+}
+
+.swatch {
+  position: relative;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  overflow: hidden;
+}
+
+.swatch i {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  width: 22px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.swatch u {
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  width: 34px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--app-border);
+  cursor: pointer;
+}
+
+.color-row span {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.color-row b {
+  font-weight: 600;
+}
+
+.color-row small {
+  color: var(--app-muted);
+  font-size: 11.5px;
+}
+
+.color-row code {
+  font: 11.5px ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  color: var(--app-muted);
+  text-transform: uppercase;
+}
+
+input[type='color'] {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid var(--app-border);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type='color']::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.reset {
+  display: block;
+  width: calc(100% - 40px);
+  margin-top: 22px;
+  padding: 10px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.reset:hover {
+  background: var(--app-surface);
+  border-color: var(--app-muted);
+}
+
+.hint {
+  margin-top: 14px;
+  color: var(--app-muted);
+  font-size: 12px;
+  user-select: text;
+}
+
+/* ---------- see-through switch ---------- */
+
+.switch-row {
+  border-bottom: 0;
+}
+
+input[role='switch'] {
+  appearance: none;
+  flex: none;
+  width: 42px;
+  height: 24px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--app-surface2);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+input[role='switch']::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--app-text);
+  transition: transform 0.15s, background 0.15s;
+}
+
+input[role='switch']:checked {
+  background: var(--app-accent);
+}
+
+input[role='switch']:checked::after {
+  transform: translateX(18px);
+  background: var(--app-on-accent);
+}
+
+/* ---------- glass look ---------- */
+
+html.glass,
+html.glass #titlebar {
+  background: transparent;
+}
+
+/* The whole window gets a wash of the chosen colors over the blurred desktop:
+   accent glowing from the top-left corner, the background color everywhere
+   else. This page sits behind the music page, so it tints that too. */
+html.glass body {
+  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--app-accent) 14%, transparent), transparent 62%),
+    radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, var(--app-accent) 8%, transparent), transparent 60%),
+    color-mix(in srgb, var(--app-bg) 10%, transparent);
+}
+
+html.glass .tb-btn,
+html.glass .wc-btn {
+  color: var(--app-text);
+}
+
+html.glass .tb-btn:hover:not(:disabled),
+html.glass .wc-btn:not(.close):hover,
+html.glass .preset:hover,
+html.glass .reset:hover {
+  background: color-mix(in srgb, var(--app-text) 12%, transparent);
+}
+
+/* The settings panel becomes a glossy sheet like the panels in the page. */
+html.glass #drawer::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 32%, transparent 60%),
+    color-mix(in srgb, var(--app-bg) 38%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-accent) 34%, color-mix(in srgb, var(--app-text) 16%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+html.glass .preset,
+html.glass .reset,
+html.glass .color-row,
+html.glass input[type='color'] {
+  border-color: color-mix(in srgb, var(--app-text) 18%, transparent);
+}
+
+/* Two-word preset names ("Raspberry & Blush") fit on two short lines. */
+.preset span {
+  line-height: 1.25;
+  min-height: 2.5em;
+  display: flex;
+  align-items: flex-end;
+}
+
+#drawer::-webkit-scrollbar {
+  width: 6px;
+}
+
+#drawer::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--app-text) 22%, transparent);
+  border-radius: 3px;
+}
