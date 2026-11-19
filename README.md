@@ -1,6 +1,6 @@
 # YTM Desktop
 
-A personal desktop window for YouTube Music on Windows. It opens the real
+An unofficial personal desktop window for YouTube Music on Windows (not affiliated with Google or YouTube). It opens the real
 `music.youtube.com` page — you sign in with your own Google account there — and
 puts a custom layout and your own colors on top of it.
 

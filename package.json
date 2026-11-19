@@ -4,7 +4,7 @@
   "version": "1.5.1",
   "description": "Personal desktop window for YouTube Music with a custom layout and colors",
   "main": "src/main.js",
-  "author": "Diego",
+  "author": "dieodoge",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
@@ -13,7 +13,7 @@
     "build": "electron-builder --win dir nsis"
   },
   "build": {
-    "appId": "local.diego.ytmdesktop",
+    "appId": "local.dieodoge.ytmdesktop",
     "productName": "YTM Desktop",
     "files": [
       "src/**/*",
