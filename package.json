@@ -5,7 +5,7 @@
   "description": "Personal desktop window for YouTube Music with a custom layout and colors",
   "main": "src/main.js",
   "author": "dieodoge",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "start": "electron .",
@@ -29,11 +29,23 @@
         "dir",
         "nsis"
       ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "YTM Desktop",
+      "artifactName": "YTM-Desktop-Setup-${version}.exe"
     }
   },
   "devDependencies": {
     "electron": "^45.3.2",
     "electron-builder": "^26.18.0",
     "playwright-core": "^1.65.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dieodoge/Funny-Music-App.git"
   }
 }
