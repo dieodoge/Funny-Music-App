@@ -6,20 +6,30 @@ puts a custom layout and your own colors on top of it.
 
 It does not download or copy audio and does not block adverts.
 
+## Download (Windows)
+
+1. Open the [latest release](https://github.com/dieodoge/Funny-Music-App/releases/latest).
+2. Under **Assets**, download the `YTM-Desktop-Setup` `.exe` file and open it. It installs in a
+   few seconds and adds a **YTM Desktop** shortcut to the desktop and the Start menu.
+3. Windows may say "Windows protected your PC", because the app is not signed with a paid
+   certificate. Click **More info**, then **Run anyway**.
+4. In the app, click **Sign in** and sign in with your own Google account.
+
+Each person's sign-in, colors and settings stay on their own PC. To remove the app, use
+Windows Settings > Apps > Installed apps > YTM Desktop > Uninstall.
+
 ## Start it
 
 Double-click **YTM Desktop** on the desktop (or find it in the Start menu).
-
-The program itself lives in `dist\win-unpacked\YTM Desktop.exe`.
 
 ## What is where
 
 - **Top bar**: back / forward / reload / home, the colors button (sun-shaped
   icon), then minimize, maximize and close.
 - **Left**: Home, Explore, Library and your playlists.
-- **Bottom bar**: track art, title and artist on the left; previous, play/pause,
-  next and the seek bar in the middle; the **Album** button and volume on the
-  right.
+- **Bottom bar**: track art, title and artist on the left with the **Album**
+  button beside them; previous, play/pause, next and the seek bar in the middle;
+  volume and extras on the right.
 - **Album button**: opens the full album of the song that is playing. It is
   greyed out when the track has no album.
 - Keyboard media keys (play/pause, next, previous) work while music is loaded.
@@ -63,8 +73,8 @@ its checks this may stop working.
 
 ## Sharing with friends
 
-On hold until the app is finished. When it is, run the build with the installer
-(`npx electron-builder --win nsis`) and send the Setup file it puts in `dist`.
+Send them the link to the [latest release](https://github.com/dieodoge/Funny-Music-App/releases/latest)
+and the steps under **Download** above.
 
 ## For rebuilding (only needed after changing the code)
 
@@ -79,3 +89,7 @@ Node.js is bundled in `.tools\node` (not installed system-wide). From this folde
 Code layout: `src/main.js` (window, settings, saving), `src/shell.*` (top bar and
 colors panel), `src/ytm-style.css` (layout and colors applied to the page),
 `src/ytm-preload.js` (the Album button), `src/theme.js` (presets).
+
+## License
+
+MIT; see [LICENSE](LICENSE).
